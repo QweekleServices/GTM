@@ -202,7 +202,7 @@ GTM → **Variables** → ouvrir et renseigner les 2 constantes :
 
 > Les paramètres de consentement sont déjà configurés sur tous les tags Google Ads.
 
-Le module est opérationnel. Pour configurer le cross-domaine (indispensable si le client a son propre nom de domaine), voir [section 4.2](#42-google-ads--conversion-linker-cross-domaine).
+Le module est opérationnel. Pour configurer le cross-domaine (indispensable si vous avez votre propre nom de domaine), voir [section 4.2](#42-google-ads--conversion-linker-cross-domaine).
 
 ---
 
@@ -339,7 +339,7 @@ Les données utilisateur sont envoyées automatiquement sur la conversion Purcha
 
 ### 4.5 Meta — API Conversions (déduplication)
 
-Si le client utilise l'API Conversions Meta côté serveur en parallèle du Pixel navigateur, la déduplication est déjà prête. Le tag `[Meta] Purchase` envoie un `order_id` (valeur de `Qweekle - DLV - ecommerce.transaction_id`) qui sert d'`event_id` pour la déduplication entre les hits navigateur et serveur. Aucune configuration supplémentaire dans GTM.
+Si vous utilisez l'API Conversions Meta côté serveur en parallèle du Pixel navigateur, la déduplication est déjà prête. Le tag `[Meta] Purchase` envoie un `order_id` (valeur de `Qweekle - DLV - ecommerce.transaction_id`) qui sert d'`event_id` pour la déduplication entre les hits navigateur et serveur. Aucune configuration supplémentaire dans GTM.
 
 ---
 
@@ -625,4 +625,4 @@ Vérifier que `disablePushState` est bien à `true` sur tous les tags Meta. Vér
 GTM peut créer des doublons si des éléments portent le même nom que des éléments existants. Après l'import, vérifier dans GTM → Variables et GTM → Déclencheurs que chaque nom n'apparaît qu'une seule fois. Supprimer les doublons en conservant la version importée.
 
 **Les conversions Google Ads ne sont pas attribuées malgré des clics sur les annonces**
-Vérifier que `URL du site de VEL` contient le bon domaine. Si le client a son propre site, vérifier que `URL site vitrine` est également renseigné (voir [section 4.2](#42-google-ads--conversion-linker-cross-domaine)).
+Vérifier que `URL du site de VEL` contient le bon domaine. Si vous avez votre propre site, vérifier que `URL site vitrine` est également renseigné (voir [section 4.2](#42-google-ads--conversion-linker-cross-domaine)).
