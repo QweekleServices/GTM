@@ -52,11 +52,15 @@
         "tagId": "202",
         "name": "[Qweekle] Consent Mode - CMP Update [A CONFIGURER]",
         "type": "html",
+        "priority": {
+                    "type": "INTEGER",
+                    "value": "10"
+                },
         "parameter": [
           {
             "type": "TEMPLATE",
             "key": "html",
-            "value": "<script>\n/*\n  ================================================================\n  QWEEKLE - INTEGRATION CMP [A CONFIGURER]\n  Decommenter le bloc correspondant a votre CMP\n  ================================================================\n\n  --- AXEPTIO ---\n  void 0 === window._axcb && (window._axcb = []);\n  window._axcb.push(function(sdk) {\n    sdk.on('cookies:complete', function(choices) {\n      function gtag(){dataLayer.push(arguments);}\n      gtag('consent', 'update', {\n        'analytics_storage': choices.google_analytics ? 'granted' : 'denied',\n        'ad_storage': (choices.meta_pixel || choices.google_ads) ? 'granted' : 'denied',\n        'ad_user_data': (choices.meta_pixel || choices.google_ads) ? 'granted' : 'denied',\n        'ad_personalization': (choices.meta_pixel || choices.google_ads) ? 'granted' : 'denied'\n      });\n    });\n  });\n\n  --- DIDOMI ---\n  window.didomiOnReady = window.didomiOnReady || [];\n  window.didomiOnReady.push(function(Didomi) {\n    function gtag(){dataLayer.push(arguments);}\n    gtag('consent', 'update', {\n      'analytics_storage': Didomi.getUserConsentStatusForPurpose('analytics') ? 'granted' : 'denied',\n      'ad_storage': Didomi.getUserConsentStatusForPurpose('advertising') ? 'granted' : 'denied',\n      'ad_user_data': Didomi.getUserConsentStatusForPurpose('advertising') ? 'granted' : 'denied',\n      'ad_personalization': Didomi.getUserConsentStatusForPurpose('advertising') ? 'granted' : 'denied'\n    });\n  });\n\n  --- COOKIEBOT ---\n  window.addEventListener('CookiebotOnAccept', function() {\n    function gtag(){dataLayer.push(arguments);}\n    gtag('consent', 'update', {\n      'analytics_storage': Cookiebot.consent.statistics ? 'granted' : 'denied',\n      'ad_storage': Cookiebot.consent.marketing ? 'granted' : 'denied',\n      'ad_user_data': Cookiebot.consent.marketing ? 'granted' : 'denied',\n      'ad_personalization': Cookiebot.consent.marketing ? 'granted' : 'denied'\n    });\n  }, false);\n*/\n</script>"
+            "value": "<script>\n/*\n  ================================================================\n  QWEEKLE - INTEGRATION CMP [A CONFIGURER]\n  Decommenter le bloc correspondant a votre CMP\n  ================================================================\n*/\n/*\n  //--- AXEPTIO ---\n  void 0 === window._axcb && (window._axcb = []);\n  window._axcb.push(function(sdk) {\n    sdk.on('cookies:complete', function(choices) {\n      function gtag(){dataLayer.push(arguments);}\n      gtag('consent', 'update', {\n        'analytics_storage': choices.google_analytics ? 'granted' : 'denied',\n        'ad_storage': (choices.meta_pixel || choices.google_ads) ? 'granted' : 'denied',\n        'ad_user_data': (choices.meta_pixel || choices.google_ads) ? 'granted' : 'denied',\n        'ad_personalization': (choices.meta_pixel || choices.google_ads) ? 'granted' : 'denied'\n      });\n    });\n  });\n*/\n/*\n  //--- DIDOMI ---\n  window.didomiOnReady = window.didomiOnReady || [];\n  window.didomiOnReady.push(function(Didomi) {\n    function gtag(){dataLayer.push(arguments);}\n    gtag('consent', 'update', {\n      'analytics_storage': Didomi.getUserConsentStatusForPurpose('analytics') ? 'granted' : 'denied',\n      'ad_storage': Didomi.getUserConsentStatusForPurpose('advertising') ? 'granted' : 'denied',\n      'ad_user_data': Didomi.getUserConsentStatusForPurpose('advertising') ? 'granted' : 'denied',\n      'ad_personalization': Didomi.getUserConsentStatusForPurpose('advertising') ? 'granted' : 'denied'\n    });\n  });\n*/\n/*\n  //--- COOKIEBOT ---\n  window.addEventListener('CookiebotOnAccept', function() {\n    function gtag(){dataLayer.push(arguments);}\n    gtag('consent', 'update', {\n      'analytics_storage': Cookiebot.consent.statistics ? 'granted' : 'denied',\n      'ad_storage': Cookiebot.consent.marketing ? 'granted' : 'denied',\n      'ad_user_data': Cookiebot.consent.marketing ? 'granted' : 'denied',\n      'ad_personalization': Cookiebot.consent.marketing ? 'granted' : 'denied'\n    });\n  }, false);\n*/\n\n</script>"
           },
           {
             "type": "BOOLEAN",
@@ -72,7 +76,7 @@
           "type": "MAP"
         },
         "consentSettings": {
-          "consentStatus": "NOT_SET"
+          "consentStatus": "NOT_NEEDED"
         }
       }
     ],
