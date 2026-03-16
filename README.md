@@ -1,8 +1,10 @@
 # Documentation — Modules GTM Qweekle
 
-> **Version** : 1.0 — 16/03/2026
-> **Audience** : clients Qweekle et agences marketing
-> Pour la référence technique complète du dataLayer, voir [DATALAYER-REFERENCE.md](DATALAYER-REFERENCE.md)
+**Version** : 1.0 — 16/03/2026
+
+**Audience** : clients Qweekle et agences marketing
+
+Pour la référence technique complète du dataLayer, voir [DATALAYER-REFERENCE.md](DATALAYER-REFERENCE.md)
 
 ## Téléchargements
 
