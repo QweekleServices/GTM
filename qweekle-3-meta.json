@@ -738,7 +738,7 @@
           {
             "type": "TEMPLATE",
             "key": "javascript",
-            "value": "function() {\n  var items = {{Qweekle - DLV - ecommerce.items}};\n  if (!items || !Array.isArray(items)) return {};\n  var props = {\n    content_ids: items.map(function(i){ return i.item_id; }),\n    contents: items.map(function(i){ return { id: i.item_id, quantity: i.quantity || 1 }; }),\n    content_type: 'product',\n    value: {{Qweekle - DLV - ecommerce.value}},\n    currency: '{{Qweekle - DLV - ecommerce.currency}}'\n  };\n  if (items[0] && items[0].item_category) {\n    props.content_category = items[0].item_category;\n  }\n  return props;\n}"
+            "value": "function() {\n  var items = {{Qweekle - DLV - ecommerce.items}};\n  if (!items || !Array.isArray(items)) return {};\n  var props = {\n    content_ids: items.map(function(i){ return i.item_id; }),\n    contents: items.map(function(i){ return { id: i.item_id, quantity: i.quantity || 1 }; }),\n    content_type: 'product',\n    value: {{Qweekle - DLV - ecommerce.value}},\n    currency: '{{Qweekle - DLV - ecommerce.currency}}'\n  };\n  if (items[0] && items[0].item_category2) {\n    props.content_category = items[0].item_category2;\n  }\n  return props;\n}"
           }
         ]
       },
@@ -752,7 +752,7 @@
           {
             "type": "TEMPLATE",
             "key": "javascript",
-            "value": "function() {\n  var items = {{Qweekle - DLV - ecommerce.items}};\n  if (!items || !Array.isArray(items)) return {};\n  var props = {\n    content_ids: items.map(function(i){ return i.item_id; }),\n    contents: items.map(function(i){ return { id: i.item_id, quantity: i.quantity || 1 }; }),\n    content_type: 'product',\n    value: {{Qweekle - DLV - ecommerce.value}},\n    currency: '{{Qweekle - DLV - ecommerce.currency}}',\n    order_id: '{{Qweekle - DLV - ecommerce.transaction_id}}'\n  };\n  if (items[0] && items[0].item_category) {\n    props.content_category = items[0].item_category;\n  }\n  return props;\n}"
+            "value": "function() {\n  var items = {{Qweekle - DLV - ecommerce.items}};\n  if (!items || !Array.isArray(items)) return {};\n  var props = {\n    content_ids: items.map(function(i){ return i.item_id; }),\n    contents: items.map(function(i){ return { id: i.item_id, quantity: i.quantity || 1 }; }),\n    content_type: 'product',\n    value: {{Qweekle - DLV - ecommerce.value}},\n    currency: '{{Qweekle - DLV - ecommerce.currency}}',\n    order_id: '{{Qweekle - DLV - ecommerce.transaction_id}}'\n  };\n  if (items[0] && items[0].item_category2) {\n    props.content_category = items[0].item_category2;\n  }\n  return props;\n}"
           }
         ]
       }

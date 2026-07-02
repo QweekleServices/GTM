@@ -1,6 +1,6 @@
 # Documentation — Modules GTM Qweekle
 
-**Version** : 1.0 — 16/03/2026
+**Version** : 1.0 — 02/07/2026
 
 **Audience** : clients Qweekle et agences marketing
 
@@ -85,6 +85,8 @@ Chaque module est indépendant : vous n'installez que les plateformes que vous u
 ```
 
 Le **dataLayer** est un tableau de données invisible sur votre site, alimenté automatiquement par Qweekle. GTM le lit et redistribue les informations vers les plateformes de votre choix. Vous n'avez rien à coder.
+
+> 💳 **Site de paiement** : le paiement s'effectue sur un domaine dédié qui ne charge pas GTM. Aucune donnée n'est perdue pour autant — la conversion remonte via l'événement `purchase`, émis au retour sur la page de confirmation du site de vente. Il n'y a donc **aucun tag à installer sur le site de paiement**.
 
 ### Les 4 modules
 
@@ -409,16 +411,18 @@ Ces variables lisent directement les clés poussées par Qweekle dans le `dataLa
 |---|---|---|---|
 | `Qweekle - DLV - ecommerce` | `ecommerce` | — | Objet ecommerce complet du dernier événement |
 | `Qweekle - DLV - ecommerce.items` | `ecommerce.items` | — | Tableau des produits de l'événement |
-| `Qweekle - DLV - ecommerce.value` | `ecommerce.value` | — | Valeur monétaire de l'événement (en euros) |
+| `Qweekle - DLV - ecommerce.value` | `ecommerce.value` | — | Valeur de commande (en euros) — jamais minorée par un bon cadeau ou un acompte |
 | `Qweekle - DLV - ecommerce.currency` | `ecommerce.currency` | `EUR` | Code devise ISO |
+| `Qweekle - DLV - ecommerce.affiliation` | `ecommerce.affiliation` | — | Slug de l'établissement (utile si un conteneur est mutualisé entre plusieurs établissements) |
 | `Qweekle - DLV - ecommerce.transaction_id` | `ecommerce.transaction_id` | — | Identifiant unique de commande |
-| `Qweekle - DLV - ecommerce.coupon` | `ecommerce.coupon` | — | Code promo éventuel appliqué |
+| `Qweekle - DLV - ecommerce.coupon` | `ecommerce.coupon` | — | Code de réduction éventuel appliqué |
+| `Qweekle - DLV - ecommerce.payment_type` | `ecommerce.payment_type` | — | Mode de paiement (ex. `external`) |
+| `Qweekle - DLV - ecommerce.shipping_tier` | `ecommerce.shipping_tier` | — | Mode retenu à l'étape réservation |
 | `Qweekle - DLV - user.user_id` | `user.user_id` | — | ID de l'utilisateur connecté |
 | `Qweekle - DLV - user.email_sha256` | `user.email_sha256` | — | Hash SHA-256 de l'email de l'utilisateur |
-| `Qweekle - DLV - payment_type` | `payment_type` | — | Mode de paiement (`card`, `gift_card`, `gift_card+card`) |
-| `Qweekle - DLV - checkout_type` | `checkout_type` | — | Mode de tunnel (`guest`, `login`, `signup`) |
-| `Qweekle - DLV - search_term` | `search_term` | — | Terme saisi dans la recherche |
-| `Qweekle - DLV - navigation_context` | `navigation_context` | — | Contexte de navigation (liste, recherche, page produit…) |
+| `Qweekle - DLV - amount_paid` | `amount_paid` | — | Montant encaissé en ligne (acompte), sur `purchase` |
+| `Qweekle - DLV - amount_due` | `amount_due` | — | Solde réglé sur place, sur `purchase` |
+| `Qweekle - DLV - gift_card_amount` | `gift_card_amount` | — | Part réglée en bon cadeau, sur `purchase` |
 
 #### Triggers — `Qweekle - CE -`
 
@@ -426,22 +430,21 @@ Ces variables lisent directement les clés poussées par Qweekle dans le `dataLa
 |---|---|---|
 | `All Pages` | Page View | Toutes les pages |
 | `Qweekle - CE - view_item_list` | Custom Event | `view_item_list` |
-| `Qweekle - CE - select_item` | Custom Event | `select_item` |
 | `Qweekle - CE - view_item` | Custom Event | `view_item` |
 | `Qweekle - CE - add_to_cart` | Custom Event | `add_to_cart` |
 | `Qweekle - CE - remove_from_cart` | Custom Event | `remove_from_cart` |
 | `Qweekle - CE - view_cart` | Custom Event | `view_cart` |
 | `Qweekle - CE - begin_checkout` | Custom Event | `begin_checkout` |
+| `Qweekle - CE - add_shipping_info` | Custom Event | `add_shipping_info` |
 | `Qweekle - CE - add_payment_info` | Custom Event | `add_payment_info` |
 | `Qweekle - CE - purchase` | Custom Event | `purchase` |
-| `Qweekle - CE - search` | Custom Event | `search` |
 | `Qweekle - CE - login` | Custom Event | `login` |
 | `Qweekle - CE - sign_up` | Custom Event | `sign_up` |
 | `Qweekle - CE - Tous les evenements ecommerce` | Custom Event (regex) | Tous les événements ecommerce en une seule règle |
 
 Le trigger regex écoute le pattern :
 ```
-^(view_item_list|select_item|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_payment_info|purchase)$
+^(view_item_list|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_shipping_info|add_payment_info|purchase)$
 ```
 
 #### Tags
@@ -488,9 +491,10 @@ Retourne le `user.user_id` depuis le dataLayer, ou `undefined` si l'utilisateur 
 - Type : Événement GA4 (`gaawe`)
 - Déclenchement : `Qweekle - CE - Tous les evenements ecommerce`
 - Consentement requis : `analytics_storage`
-- Envoie 3 paramètres custom : `navigation_context`, `checkout_type`, `payment_type`
+- L'objet `ecommerce` est lu depuis le dataLayer : `affiliation`, `value`, `items`, `transaction_id`, `coupon`, `payment_type`, `shipping_tier` sont transmis automatiquement à GA4
+- Envoie 3 paramètres custom sur `purchase` : `amount_paid`, `amount_due`, `gift_card_amount` (absents des autres événements — voir [DATALAYER-REFERENCE.md](DATALAYER-REFERENCE.md), section 6)
 
-**`[GA4] search`** — Déclenchement : `Qweekle - CE - search` · Envoie `search_term`
+> 💡 Pour exploiter `amount_paid`, `amount_due` et `gift_card_amount` dans les rapports, créez les définitions personnalisées correspondantes dans GA4 (Admin → Définitions personnalisées → Métriques personnalisées, portée Événement, unité Devise).
 
 **`[GA4] login`** — Déclenchement : `Qweekle - CE - login` · Envoie le `user_id` en user property
 
@@ -518,9 +522,9 @@ L'Advanced Matching est activé sur tous les tags Meta. L'email hashé (`user.em
 
 #### Variables Custom JavaScript
 
-**`Qweekle - CJS - Meta Event Props`** — Construit l'objet propriétés pour ViewContent, AddToCart, InitiateCheckout (`content_ids`, `contents`, `content_type`, `value`, `currency`). Ajoute `content_category` depuis `item_category` du premier produit si disponible.
+**`Qweekle - CJS - Meta Event Props`** — Construit l'objet propriétés pour ViewContent, AddToCart, InitiateCheckout (`content_ids`, `contents`, `content_type`, `value`, `currency`). Ajoute `content_category` depuis `item_category2` (catégorie catalogue, stable) du premier produit si disponible.
 
-**`Qweekle - CJS - Meta Purchase Props`** — Identique, avec `order_id` en plus pour la déduplication API Conversions et `content_category` depuis `item_category` du premier produit.
+**`Qweekle - CJS - Meta Purchase Props`** — Identique, avec `order_id` en plus pour la déduplication API Conversions et `content_category` depuis `item_category2` du premier produit.
 
 #### Tags
 
@@ -578,6 +582,8 @@ Le cross-domain est activé — les domaines sont lus depuis les trois variables
 
 La conversion Purchase envoie valeur, devise, order_id et les données Enhanced Conversions quand disponibles (voir [section 4.4](#44-enhanced-conversions--google-ads)).
 
+> La valeur envoyée (`ecommerce.value`) est la **valeur de commande complète** : elle n'est jamais minorée par un bon cadeau ou un acompte (voir [DATALAYER-REFERENCE.md](DATALAYER-REFERENCE.md), section 6). Le ROAS Google Ads reflète donc le chiffre d'affaires réel de la commande.
+
 ---
 
 ## 7. Glossaire
@@ -601,6 +607,8 @@ La conversion Purchase envoie valeur, devise, order_id et les données Enhanced 
 | **Advanced Matching** | Fonctionnalité Meta équivalente aux Enhanced Conversions. Améliore la précision des audiences et des conversions Meta. |
 | **SHA-256** | Algorithme qui transforme une donnée sensible (ex : email) en une chaîne de caractères illisible. Permet d'envoyer des données utilisateur sans exposer les informations personnelles. |
 | **ecommerce** | Objet standard qui décrit un événement commercial : liste de produits, prix, devise, identifiant de transaction. |
+| **Affiliation** | Slug technique de l'établissement (ex : `RE-VOL`), présent sur tous les événements. Il identifie l'établissement à l'origine de l'événement — indispensable si vous choisissez de mutualiser un même conteneur GTM ou une même propriété GA4 entre plusieurs établissements (configuration optionnelle). |
+| **Tag (catégorie en ligne)** | Le champ `item_category` d'un produit : l'univers de merchandising d'où le produit a été ajouté au panier (carrousel, header). Figé par ligne de panier jusqu'au purchase ; vaut `(direct)` si ajout sans contexte de liste. Les champs `item_category2/3/4` décrivent en revanche le produit dans le catalogue (stables). |
 | **VEL (Vente En Ligne)** | Le site de boutique Qweekle du client (ex : `client.qweekle.shop`). |
 | **SPA (Single Page Application)** | Architecture web où la page ne se recharge pas entièrement lors de la navigation. Le paramètre `disablePushState` sur les tags Meta évite les doublons dans ce contexte. |
 
@@ -613,6 +621,9 @@ Vérifier que la CMP est bien décommentée dans le tag `[Qweekle] Consent Mode 
 
 **Une variable CJS retourne `undefined` ou `{}`**
 Ouvrir la console navigateur, taper `dataLayer` et vérifier que `user.user_id` et `user.email_sha256` sont bien présents. Si les champs sont vides, les variables retournent `undefined` intentionnellement — aucune donnée n'est envoyée vers les plateformes.
+
+**Aucun événement pendant le paiement**
+C'est normal : le site de paiement ne charge pas GTM. L'événement `purchase` est émis au retour sur la page de confirmation du site de vente. Si le `purchase` n'apparaît pas après un paiement réussi, vérifier que le retour aboutit bien sur la page de confirmation (`/checkout/confirmation`).
 
 **L'événement purchase ne remonte pas dans Google Ads**
 Vérifier que `Qweekle - DLV - ecommerce.value` est non nul (Google Ads ignore les conversions à 0). Vérifier que `Qweekle - DLV - ecommerce.transaction_id` est unique à chaque commande pour éviter la déduplication.

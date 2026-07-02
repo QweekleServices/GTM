@@ -115,30 +115,6 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "103",
-        "name": "Qweekle - CE - select_item",
-        "type": "CUSTOM_EVENT",
-        "customEventFilter": [
-          {
-            "type": "EQUALS",
-            "parameter": [
-              {
-                "type": "TEMPLATE",
-                "key": "arg0",
-                "value": "{{_event}}"
-              },
-              {
-                "type": "TEMPLATE",
-                "key": "arg1",
-                "value": "select_item"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
         "triggerId": "104",
         "name": "Qweekle - CE - view_item",
         "type": "CUSTOM_EVENT",
@@ -259,6 +235,30 @@
       {
         "accountId": "0",
         "containerId": "0",
+        "triggerId": "115",
+        "name": "Qweekle - CE - add_shipping_info",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "add_shipping_info"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
         "triggerId": "109",
         "name": "Qweekle - CE - add_payment_info",
         "type": "CUSTOM_EVENT",
@@ -299,30 +299,6 @@
                 "type": "TEMPLATE",
                 "key": "arg1",
                 "value": "purchase"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "triggerId": "111",
-        "name": "Qweekle - CE - search",
-        "type": "CUSTOM_EVENT",
-        "customEventFilter": [
-          {
-            "type": "EQUALS",
-            "parameter": [
-              {
-                "type": "TEMPLATE",
-                "key": "arg0",
-                "value": "{{_event}}"
-              },
-              {
-                "type": "TEMPLATE",
-                "key": "arg1",
-                "value": "search"
               }
             ]
           }
@@ -394,7 +370,7 @@
               {
                 "type": "TEMPLATE",
                 "key": "arg1",
-                "value": "^(view_item_list|select_item|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_payment_info|purchase)$"
+                "value": "^(view_item_list|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_shipping_info|add_payment_info|purchase)$"
               }
             ]
           }
@@ -603,7 +579,7 @@
         "accountId": "0",
         "containerId": "0",
         "variableId": "9",
-        "name": "Qweekle - DLV - payment_type",
+        "name": "Qweekle - DLV - ecommerce.payment_type",
         "type": "v",
         "parameter": [
           {
@@ -619,7 +595,7 @@
           {
             "type": "TEMPLATE",
             "key": "name",
-            "value": "payment_type"
+            "value": "ecommerce.payment_type"
           }
         ]
       },
@@ -627,7 +603,7 @@
         "accountId": "0",
         "containerId": "0",
         "variableId": "10",
-        "name": "Qweekle - DLV - checkout_type",
+        "name": "Qweekle - DLV - ecommerce.affiliation",
         "type": "v",
         "parameter": [
           {
@@ -643,7 +619,7 @@
           {
             "type": "TEMPLATE",
             "key": "name",
-            "value": "checkout_type"
+            "value": "ecommerce.affiliation"
           }
         ]
       },
@@ -651,7 +627,7 @@
         "accountId": "0",
         "containerId": "0",
         "variableId": "11",
-        "name": "Qweekle - DLV - search_term",
+        "name": "Qweekle - DLV - ecommerce.shipping_tier",
         "type": "v",
         "parameter": [
           {
@@ -667,7 +643,7 @@
           {
             "type": "TEMPLATE",
             "key": "name",
-            "value": "search_term"
+            "value": "ecommerce.shipping_tier"
           }
         ]
       },
@@ -675,7 +651,7 @@
         "accountId": "0",
         "containerId": "0",
         "variableId": "12",
-        "name": "Qweekle - DLV - navigation_context",
+        "name": "Qweekle - DLV - amount_paid",
         "type": "v",
         "parameter": [
           {
@@ -691,7 +667,55 @@
           {
             "type": "TEMPLATE",
             "key": "name",
-            "value": "navigation_context"
+            "value": "amount_paid"
+          }
+        ]
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "13",
+        "name": "Qweekle - DLV - amount_due",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "amount_due"
+          }
+        ]
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "14",
+        "name": "Qweekle - DLV - gift_card_amount",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "gift_card_amount"
           }
         ]
       }
