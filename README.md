@@ -1,6 +1,6 @@
 # Documentation — Modules GTM Qweekle
 
-**Version** : 1.0 — 02/07/2026
+**Version** : 1.1 — 18/09/2026
 
 **Audience** : clients Qweekle et agences marketing
 
@@ -126,6 +126,12 @@ La procédure est identique pour les 4 modules.
 
 > ⚠️ **Toujours choisir "Fusionner"**. L'option "Écraser" supprime l'intégralité du container existant et ne peut pas être annulée.
 
+> 📁 Après l'import, les éléments Qweekle sont rangés dans deux dossiers du container — vos propres éléments restent intacts :
+> - **`Qweekle - [A CONFIGURER]`** : les seuls éléments que vous devez ouvrir et renseigner (tag CMP, identifiants de plateformes). Tout votre setup se trouve dans ce dossier.
+> - **`Qweekle`** : tout le reste (tags, déclencheurs, variables) — préconfiguré, rien à toucher.
+>
+> Seuls le modèle personnalisé Facebook Pixel (module Meta) et les variables intégrées apparaissent hors dossier, GTM ne permettant pas de les y ranger.
+
 > 💡 **Conseil** : créer un espace de travail dédié avant l'import (GTM → Espaces de travail → `+`) pour pouvoir isoler les changements et les annuler si nécessaire.
 
 ---
@@ -133,6 +139,10 @@ La procédure est identique pour les 4 modules.
 ## 3. Mise en route minimale
 
 Après import, les seules actions requises sont de **renseigner vos identifiants de plateformes** et de **configurer votre bannière cookies**. Tout le reste est préconfiguré.
+
+> 📁 Les variables à renseigner sont regroupées dans le dossier **`Qweekle - [A CONFIGURER]`** du container.
+>
+> Ce dossier ne couvre en revanche pas tout : le choix du bloc CMP se fait dans le corps du tag `Consent Mode - CMP Update` ([section 4.1](#41-consent-mode--intégration-cmp-détaillée)), et certaines étapes se passent hors de GTM (activation des Enhanced Conversions, exclusion de référents GA4, validation du domaine Meta).
 
 ### 3.1 Module Base — obligatoire pour tous
 
@@ -145,9 +155,13 @@ Aucun identifiant à renseigner. La seule action requise est de connecter votre 
 **Procédure (5 minutes) :**
 
 1. GTM → **Tags** → ouvrir `[Qweekle] Consent Mode - CMP Update [A CONFIGURER]`
-2. Localiser le bloc correspondant à votre bannière cookies (Axeptio, Didomi ou Cookiebot)
-3. Supprimer les `/*` et `*/` qui l'entourent — uniquement ce bloc
+2. Localiser le bloc correspondant à votre bannière cookies (Axeptio, Didomi, Cookiebot ou CookieYes)
+3. Supprimer les `/*` et `*/` qui l'entourent — **uniquement ce bloc**
 4. Sauvegarder
+
+> **Ne jamais commenter la « PARTIE COMMUNE »** en haut du tag : elle définit la fonction `qweekleUpdateConsent()` qu'appellent tous les blocs CMP. Seuls les blocs CMP se décommentent.
+
+> Si votre CMP gère déjà le Consent Mode nativement via son propre template GTM (cas de Cookiebot ou CookieYes installés comme tags GTM), **laisser tous les blocs commentés** — sinon le consentement serait mis à jour deux fois.
 
 Pour les détails de personnalisation par CMP (clés Axeptio, IDs Didomi), voir [section 4.1](#41-consent-mode--intégration-cmp-détaillée).
 
@@ -166,6 +180,14 @@ Pour les détails de personnalisation par CMP (clés Axeptio, IDs Didomi), voir 
 GTM → **Variables** → ouvrir `Qweekle - CONST - [A CONFIGURER] GA4 Measurement ID` → remplacer `G-XXXXXXXXXX` par l'ID du client.
 
 > Les paramètres de consentement sont déjà configurés sur tous les tags GA4.
+
+**Action obligatoire dans GA4 — exclure le domaine de paiement** ⭐
+
+GA4 → Admin → **Flux de données** → ouvrir le flux web → **Paramètres de balise** → *Afficher plus* → **Répertorier les référents indésirables** → ajouter `payments.qweekle.app` (condition : *Le domaine de référence contient*).
+
+**Pourquoi c'est indispensable** : le paiement se déroule sur un domaine séparé. Au retour sur la page de confirmation, GA4 voit `payments.qweekle.app` comme nouvelle source de trafic et **démarre une nouvelle session**. L'événement `purchase` tombe alors dans cette session, attribué à `payments.qweekle.app / referral` au lieu de la campagne d'origine (Google Ads, Meta, SEO…).
+
+Sans cette exclusion, **100 % des transactions perdent leur source d'acquisition**. Rien n'indique le problème : les achats remontent bien dans GA4, ils sont simplement tous attribués au domaine de paiement — les campagnes payantes semblent ne rien rapporter.
 
 Le module est opérationnel. Pour activer les Conversions améliorées (données utilisateur), voir [section 4.3](#43-enhanced-conversions--ga4).
 
@@ -221,6 +243,7 @@ Avant de passer à la validation, vérifier que chaque étape est complète.
 **Module GA4** *(si utilisé)*
 - [ ] Module GA4 importé en mode **Fusion**
 - [ ] `Qweekle - CONST - [A CONFIGURER] GA4 Measurement ID` renseigné
+- [ ] `payments.qweekle.app` ajouté aux **référents indésirables** dans GA4 (section 3.2) — sinon toutes les conversions sont attribuées au domaine de paiement
 
 **Module Meta** *(si utilisé)*
 - [ ] Module Meta importé en mode **Fusion**
@@ -245,7 +268,23 @@ Avant de passer à la validation, vérifier que chaque étape est complète.
 
 ### 4.1 Consent Mode — intégration CMP détaillée
 
-Le tag `[Qweekle] Consent Mode - CMP Update` contient les blocs de code pour trois CMP, tous commentés. Après avoir décommenté le bon bloc (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)), il peut être nécessaire d'adapter les identifiants propres au projet du client.
+Le tag `[Qweekle] Consent Mode - CMP Update` contient les blocs de code pour quatre CMP, tous commentés. Après avoir décommenté le bon bloc (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)), il peut être nécessaire d'adapter les identifiants propres au projet du client.
+
+Tous les blocs appellent une fonction commune, définie en haut du tag et **toujours active** :
+
+```javascript
+function qweekleUpdateConsent(analyticsConsent, advertisingConsent) {
+  function gtag() { window.dataLayer.push(arguments); }
+  gtag('consent', 'update', {
+    'analytics_storage':  analyticsConsent  ? 'granted' : 'denied',
+    'ad_storage':         advertisingConsent ? 'granted' : 'denied',
+    'ad_user_data':       advertisingConsent ? 'granted' : 'denied',
+    'ad_personalization': advertisingConsent ? 'granted' : 'denied'
+  });
+}
+```
+
+Chaque bloc CMP se contente donc d'appeler `qweekleUpdateConsent(<analytics>, <publicité>)` avec les booléens de sa propre API.
 
 ---
 
@@ -253,16 +292,19 @@ Le tag `[Qweekle] Consent Mode - CMP Update` contient les blocs de code pour tro
 
 ```javascript
 void 0 === window._axcb && (window._axcb = []);
+
 window._axcb.push(function(sdk) {
+
   sdk.on('cookies:complete', function(choices) {
-    function gtag(){dataLayer.push(arguments);}
-    gtag('consent', 'update', {
-      'analytics_storage':  choices.google_analytics ? 'granted' : 'denied',
-      'ad_storage':         (choices.meta_pixel || choices.google_ads) ? 'granted' : 'denied',
-      'ad_user_data':       (choices.meta_pixel || choices.google_ads) ? 'granted' : 'denied',
-      'ad_personalization': (choices.meta_pixel || choices.google_ads) ? 'granted' : 'denied'
-    });
+
+    qweekleUpdateConsent(
+      choices.google_analytics === true,
+      choices.meta_pixel === true ||
+      choices.google_ads === true
+    );
+
   });
+
 });
 ```
 
@@ -272,14 +314,14 @@ window._axcb.push(function(sdk) {
 
 ```javascript
 window.didomiOnReady = window.didomiOnReady || [];
+
 window.didomiOnReady.push(function(Didomi) {
-  function gtag(){dataLayer.push(arguments);}
-  gtag('consent', 'update', {
-    'analytics_storage':  Didomi.getUserConsentStatusForPurpose('analytics') ? 'granted' : 'denied',
-    'ad_storage':         Didomi.getUserConsentStatusForPurpose('advertising') ? 'granted' : 'denied',
-    'ad_user_data':       Didomi.getUserConsentStatusForPurpose('advertising') ? 'granted' : 'denied',
-    'ad_personalization': Didomi.getUserConsentStatusForPurpose('advertising') ? 'granted' : 'denied'
-  });
+
+  qweekleUpdateConsent(
+    Didomi.getUserConsentStatusForPurpose('analytics'),
+    Didomi.getUserConsentStatusForPurpose('advertising')
+  );
+
 });
 ```
 
@@ -288,16 +330,95 @@ window.didomiOnReady.push(function(Didomi) {
 **Cookiebot** — aucun identifiant à adapter :
 
 ```javascript
-window.addEventListener('CookiebotOnAccept', function() {
-  function gtag(){dataLayer.push(arguments);}
-  gtag('consent', 'update', {
-    'analytics_storage':  Cookiebot.consent.statistics ? 'granted' : 'denied',
-    'ad_storage':         Cookiebot.consent.marketing ? 'granted' : 'denied',
-    'ad_user_data':       Cookiebot.consent.marketing ? 'granted' : 'denied',
-    'ad_personalization': Cookiebot.consent.marketing ? 'granted' : 'denied'
-  });
-}, false);
+window.addEventListener(
+  'CookiebotOnAccept',
+  function() {
+
+    qweekleUpdateConsent(
+      Cookiebot.consent.statistics === true,
+      Cookiebot.consent.marketing === true
+    );
+
+  },
+  false
+);
 ```
+
+---
+
+**CookieYes** — aucun identifiant à adapter. CookieYes expose deux formats de payload selon la version du script ; le bloc gère les deux, et écoute à la fois le chargement de la bannière et les changements ultérieurs :
+
+```javascript
+function qweekleCookieYesList(accepted) {
+
+  if (typeof accepted === 'string') {
+    accepted = accepted.split(',');
+  }
+
+  if (!accepted || !accepted.length) {
+    return null;
+  }
+
+  var out = [];
+
+  for (var i = 0; i < accepted.length; i++) {
+    out.push(String(accepted[i]).trim());
+  }
+
+  return out;
+}
+
+
+function qweekleCookieYesConsent(detail) {
+
+  if (!detail) {
+    return;
+  }
+
+  var list = qweekleCookieYesList(detail.accepted);
+
+  if (list) {
+
+    qweekleUpdateConsent(
+      list.indexOf('analytics') !== -1,
+      list.indexOf('advertisement') !== -1
+    );
+
+    return;
+  }
+
+  if (detail.categories) {
+
+    qweekleUpdateConsent(
+      detail.categories.analytics === true,
+      detail.categories.advertisement === true
+    );
+
+    return;
+  }
+
+  // Format de payload non reconnu : on ne touche pas au consentement
+  // plutot que de le passer a 'denied' a tort.
+}
+
+
+document.addEventListener(
+  'cookieyes_banner_load',
+  function(eventData) {
+    qweekleCookieYesConsent(eventData.detail);
+  }
+);
+
+
+document.addEventListener(
+  'cookieyes_consent_update',
+  function(eventData) {
+    qweekleCookieYesConsent(eventData.detail);
+  }
+);
+```
+
+> Si CookieYes est installé **comme tag GTM** (template « CookieYes CMP ») avec sa propre gestion du Consent Mode, laisser ce bloc commenté : le consentement serait sinon envoyé deux fois.
 
 ---
 
@@ -312,7 +433,7 @@ Le Conversion Linker est préconfiguré avec `enableCrossDomain: true` et trois 
 | Variable | Valeur par défaut | Quand la renseigner |
 |---|---|---|
 | `Qweekle - CONST - [A CONFIGURER] URL du site de VEL` | `client.qweekle.shop` | Toujours — remplacer par le vrai domaine du site Qweekle du client |
-| `Qweekle - CONST - URL du site de paiement` | `paiement.qweekle.shop` | Déjà renseignée par défaut, à ajuster si besoin |
+| `Qweekle - CONST - URL du site de paiement` | `payments.qweekle.app` | Déjà renseignée par défaut — ne pas modifier sauf indication contraire de Qweekle |
 | `Qweekle - CONST - [A CONFIGURER] URL site vitrine` | `monsite.fr` | Si votre propre site vitrine redirige vers le tunnel Qweekle |
 
 **Pourquoi c'est important** : sans le troisième domaine (`URL site vitrine`), les clics Google Ads provenant de `monsite.fr` perdent leur GCLID lors du passage vers le domaine Qweekle. La conversion n'est alors pas attribuée à la publicité — le ROAS affiché dans Google Ads est faussé.
@@ -344,6 +465,71 @@ Les données utilisateur sont envoyées automatiquement sur la conversion Purcha
 ### 4.5 Meta — API Conversions (déduplication)
 
 Si vous utilisez l'API Conversions Meta côté serveur en parallèle du Pixel navigateur, la déduplication est déjà prête. Le tag `[Meta] Purchase` envoie un `order_id` (valeur de `Qweekle - DLV - ecommerce.transaction_id`) qui sert d'`event_id` pour la déduplication entre les hits navigateur et serveur. Aucune configuration supplémentaire dans GTM.
+
+---
+
+### 4.6 Utilisation d'un compte démo
+
+Qweekle peut fournir un **compte de démonstration** pour mettre en place et tester le conteneur GTM avant l'ouverture du site réel. Le dataLayer y est strictement identique à celui d'un compte live : mêmes événements, mêmes champs. Tout ce qui est validé sur la démo fonctionnera à l'identique en production.
+
+**La seule différence est l'URL.** Le compte démo a son propre domaine (par exemple `demo-nom-du-client.qweekle.shop`), distinct de celui du compte live (`client.qweekle.shop`). C'est ce point qui demande quelques ajustements au moment du passage en production.
+
+#### 4.6.1 Passage de la démo au live
+
+**1. Installer la balise GTM sur le compte live**
+
+Renseigner l'identifiant du conteneur (`GTM-XXXXXXX`) dans le back-office Qweekle du **compte live**. Sans cette étape, le site de production n'envoie strictement rien.
+
+**2. Retirer la balise GTM du compte démo** ⭐
+
+Une fois le live en place, supprimer l'identifiant GTM du compte démo. **C'est important** : si les deux comptes utilisent le même conteneur, les tests et démonstrations effectués sur la démo continuent d'envoyer de vrais événements (`purchase` inclus) vers GA4, Meta et Google Ads. Conséquences concrètes :
+
+- du chiffre d'affaires fictif dans les rapports GA4 et Google Ads ;
+- des conversions parasites qui faussent le ROAS et polluent l'apprentissage des algorithmes publicitaires ;
+- des audiences de remarketing contaminées par des visiteurs de test.
+
+> Si vous devez conserver la démo active en parallèle du live, ne la laissez **pas** pointer vers le conteneur de production : utilisez un second conteneur GTM dédié aux tests, ou filtrez le trafic de démonstration côté GA4 (Admin → Flux de données → définir le trafic interne, puis exclure ce trafic dans les paramètres de données).
+
+**3. Mettre à jour les URL dans GTM**
+
+Le changement de domaine impacte deux endroits du conteneur — voir le détail ci-dessous.
+
+**4. Republier le conteneur**
+
+Les modifications ne prennent effet qu'après un **Envoyer → Publier** (voir [section 5.3](#53-publier)).
+
+#### 4.6.2 Actions à faire dans GTM pour la nouvelle URL
+
+**a) Variable du domaine de vente — obligatoire**
+
+GTM → **Variables** → `Qweekle - CONST - [A CONFIGURER] URL du site de VEL` → remplacer le domaine de démo par le domaine live (par exemple `demo-nom-du-client.qweekle.shop` → `client.qweekle.shop`).
+
+Cette variable alimente le Conversion Linker Google Ads. Si elle reste sur le domaine de démo, le GCLID n'est plus transmis lors du passage vers le site de paiement et **les conversions Google Ads ne sont plus attribuées** (voir [section 4.2](#42-google-ads--conversion-linker-cross-domaine)).
+
+> Saisir le domaine **sans** `https://` ni barre oblique finale : `client.qweekle.shop`.
+
+**b) Vérifier les autres variables de domaine**
+
+Toujours dans **Variables**, contrôler les deux autres constantes du module Google Ads :
+
+| Variable | À vérifier |
+|---|---|
+| `Qweekle - CONST - URL du site de paiement` | Déjà renseignée (`payments.qweekle.app`) — inchangée entre démo et live, aucune action |
+| `Qweekle - CONST - [A CONFIGURER] URL site vitrine` | À renseigner si le client possède un site vitrine qui redirige vers le tunnel Qweekle |
+
+**c) Mettre à jour les plateformes de destination**
+
+Le changement de domaine se répercute en dehors de GTM :
+
+- **GA4** : Admin → Flux de données → mettre à jour l'URL du flux web. Vérifier aussi la liste des **domaines référents exclus** (Admin → Flux de données → Paramètres de balise → Répertorier les référents indésirables) pour y remplacer le domaine de démo par le domaine live et le domaine de paiement.
+- **Meta** : Business Manager → vérifier le domaine dans les paramètres du Pixel, et valider le nouveau domaine si vous utilisez Aggregated Event Measurement.
+- **Google Ads** : vérifier que les URL finales des annonces pointent vers le domaine live.
+
+**d) Retester avant publication**
+
+Rejouer un parcours complet sur le **domaine live** en mode Aperçu (voir [section 5.1](#51-tester-avec-le-mode-aperçu-gtm)) : le mode Aperçu doit se connecter au nouveau domaine, et les tags de conversion doivent se déclencher sur un `purchase` réel.
+
+> **Nettoyage des données de test** : les événements générés pendant la phase de démo restent dans GA4. Ils ne peuvent pas être supprimés rétroactivement, mais vous pouvez marquer la date de bascule (GA4 → Admin → **Annotations**) pour interpréter correctement l'historique, ou exclure la période concernée de vos rapports.
 
 ---
 
@@ -457,7 +643,7 @@ Le trigger regex écoute le pattern :
 **`[Qweekle] Consent Mode - CMP Update [A CONFIGURER]`**
 - Type : HTML personnalisé
 - Déclenchement : `All Pages`, `ONCE_PER_LOAD`, sans condition de consentement
-- Rôle : écoute la décision de l'utilisateur via la CMP et met à jour les états de consentement. Contient les blocs pour Axeptio, Didomi et Cookiebot à décommenter (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)).
+- Rôle : écoute la décision de l'utilisateur via la CMP et met à jour les états de consentement. Contient les blocs pour Axeptio, Didomi, Cookiebot et CookieYes à décommenter (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)).
 
 ---
 
@@ -564,7 +750,7 @@ Le cross-domain est activé — les domaines sont lus depuis les trois variables
 | `Qweekle - CONST - [A CONFIGURER] Google Ads Conversion ID` | `AW-XXXXXXXXXX` | Identifiant du compte Google Ads du client |
 | `Qweekle - CONST - [A CONFIGURER] Google Ads Conversion Label` | `XXXXXXXXXXXXXXXXXXX` | Libellé de la conversion Purchase |
 | `Qweekle - CONST - [A CONFIGURER] URL du site de VEL` | `client.qweekle.shop` | Domaine du site Qweekle du client |
-| `Qweekle - CONST - URL du site de paiement` | `paiement.qweekle.shop` | Domaine du tunnel de paiement |
+| `Qweekle - CONST - URL du site de paiement` | `payments.qweekle.app` | Domaine du tunnel de paiement |
 | `Qweekle - CONST - [A CONFIGURER] URL site vitrine` | `monsite.fr` | Domaine propre du client s'il en possède un |
 
 #### Variable Custom JavaScript
@@ -598,7 +784,7 @@ La conversion Purchase envoie valeur, devise, order_id et les données Enhanced 
 | **CONST (Constante)** | Variable GTM dont la valeur est fixe, renseignée une fois par client. Exemple : l'ID de la propriété GA4. |
 | **CJS (Custom JavaScript)** | Variable GTM contenant une fonction JavaScript qui transforme ou combine des données avant de les envoyer. |
 | **Consent Mode** | Mécanisme Google qui bloque les tags de mesure tant que l'utilisateur n'a pas accepté les cookies. Obligatoire en Europe (RGPD). |
-| **CMP (Consent Management Platform)** | La bannière cookies du site : Axeptio, Didomi, Cookiebot ou autre. Elle recueille le consentement de l'utilisateur. |
+| **CMP (Consent Management Platform)** | La bannière cookies du site : Axeptio, Didomi, Cookiebot, CookieYes ou autre. Elle recueille le consentement de l'utilisateur. |
 | **RGPD** | Règlement Général sur la Protection des Données. Réglementation européenne qui impose de recueillir le consentement avant de collecter des données sur les visiteurs. |
 | **Fusion** | Méthode d'import GTM qui ajoute les éléments importés à ceux existants, sans rien supprimer. À toujours préférer à "Écraser". |
 | **GCLID** | Identifiant de clic ajouté par Google Ads à l'URL quand un visiteur clique sur une publicité. Permet d'attribuer une conversion à la bonne annonce. |
@@ -617,10 +803,16 @@ La conversion Purchase envoie valeur, devise, order_id et les données Enhanced 
 ## 8. Dépannage
 
 **Les tags se déclenchent avant le consentement**
-Vérifier que la CMP est bien décommentée dans le tag `[Qweekle] Consent Mode - CMP Update` (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)). Si nécessaire, augmenter la priorité du tag Consent Mode Default : ouvrir le tag → Paramètres avancés → Priorité du déclenchement → mettre `10`.
+Vérifier que la CMP est bien décommentée dans le tag `[Qweekle] Consent Mode - CMP Update` (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)). Vérifier aussi l'ordre des deux tags de consentement : `Consent Mode - Default` doit avoir une **priorité supérieure** à `Consent Mode - CMP Update` (100 contre 10 dans les modules livrés), car dans GTM la priorité la plus haute se déclenche en premier.
 
 **Une variable CJS retourne `undefined` ou `{}`**
 Ouvrir la console navigateur, taper `dataLayer` et vérifier que `user.user_id` et `user.email_sha256` sont bien présents. Si les champs sont vides, les variables retournent `undefined` intentionnellement — aucune donnée n'est envoyée vers les plateformes.
+
+**Dans GA4, presque tout le chiffre d'affaires vient de `payments.qweekle.app / referral`**
+
+Le domaine de paiement n'est pas exclu des référents. Au retour du paiement, GA4 ouvre une nouvelle session attribuée à ce domaine et y range le `purchase`, ce qui efface la source d'acquisition réelle. Ajouter `payments.qweekle.app` aux **référents indésirables** (voir [section 3.2](#32-module-ga4--mise-en-route-minimale)).
+
+> L'exclusion n'est pas rétroactive : les sessions déjà enregistrées gardent leur attribution erronée. Seules les données postérieures au changement sont correctes.
 
 **Aucun événement pendant le paiement**
 C'est normal : le site de paiement ne charge pas GTM. L'événement `purchase` est émis au retour sur la page de confirmation du site de vente. Si le `purchase` n'apparaît pas après un paiement réussi, vérifier que le retour aboutit bien sur la page de confirmation (`/checkout/confirmation`).

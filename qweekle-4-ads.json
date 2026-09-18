@@ -52,7 +52,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -131,7 +132,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -223,7 +225,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -280,7 +283,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       }
     ],
     "trigger": [
@@ -289,7 +293,8 @@
         "containerId": "0",
         "triggerId": "101",
         "name": "All Pages",
-        "type": "PAGEVIEW"
+        "type": "PAGEVIEW",
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -313,7 +318,8 @@
               }
             ]
           }
-        ]
+        ],
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -337,7 +343,8 @@
               }
             ]
           }
-        ]
+        ],
+        "parentFolderId": "500"
       }
     ],
     "variable": [
@@ -353,7 +360,8 @@
             "key": "value",
             "value": "AW-XXXXXXXXXX"
           }
-        ]
+        ],
+        "parentFolderId": "501"
       },
       {
         "accountId": "0",
@@ -367,7 +375,8 @@
             "key": "value",
             "value": "XXXXXXXXXXXXXXXXXXX"
           }
-        ]
+        ],
+        "parentFolderId": "501"
       },
       {
         "accountId": "0",
@@ -381,7 +390,8 @@
             "key": "javascript",
             "value": "function() {\n  var email = {{Qweekle - DLV - user.email_sha256}};\n  var uid   = {{Qweekle - DLV - user.user_id}};\n  if (!email && !uid) return undefined;\n  var obj = {};\n  if (email) obj.sha256_email_address = email;\n  if (uid)   obj.external_id = uid;\n  return obj;\n}"
           }
-        ]
+        ],
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -395,7 +405,8 @@
             "key": "value",
             "value": "client.qweekle.shop"
           }
-        ]
+        ],
+        "parentFolderId": "501"
       },
       {
         "accountId": "0",
@@ -407,9 +418,10 @@
           {
             "type": "TEMPLATE",
             "key": "value",
-            "value": "paiement.qweekle.shop"
+            "value": "payments.qweekle.app"
           }
-        ]
+        ],
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -423,7 +435,8 @@
             "key": "value",
             "value": "monsite.fr"
           }
-        ]
+        ],
+        "parentFolderId": "501"
       }
     ],
     "builtInVariable": [
@@ -456,6 +469,20 @@
         "containerId": "0",
         "type": "EVENT",
         "name": "Event"
+      }
+    ],
+    "folder": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "folderId": "500",
+        "name": "Qweekle"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "folderId": "501",
+        "name": "Qweekle - [A CONFIGURER]"
       }
     ]
   }

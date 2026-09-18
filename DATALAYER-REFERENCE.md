@@ -3,7 +3,9 @@
 > **Audience** : agences marketing et intégrateurs techniques
 > Document complémentaire à [README.md](README.md)
 >
-> **Version** : 1.0 — 02/07/2026
+> **Version** : 1.1 — 18/09/2026
+>
+> Validé contre une capture Tag Assistant réelle (4 parcours, 3 commandes payées) — voir [section 11](#11-validation-terrain-18092026).
 
 Ce document décrit l'ensemble des événements poussés par la plateforme Qweekle dans le `dataLayer`, leur structure de données et les valeurs attendues.
 
@@ -21,6 +23,7 @@ Ce document décrit l'ensemble des événements poussés par la plateforme Qweek
 8. [Événements ecommerce](#8-événements-ecommerce)
 9. [Événements utilisateur](#9-événements-utilisateur)
 10. [Notes d'implémentation](#10-notes-dimplémentation)
+11. [Validation terrain (18/09/2026)](#11-validation-terrain-18092026)
 
 ---
 
@@ -55,6 +58,7 @@ window.dataLayer.push({
 | `purchase` | Ecommerce | Confirmation de commande (retour du site de paiement) |
 | `login` | Utilisateur | Connexion |
 | `sign_up` | Utilisateur | Création de compte |
+| `sign_out` | Utilisateur | Déconnexion |
 
 ---
 
@@ -395,6 +399,10 @@ Tous les items du panier. `value` = valeur de commande — elle reste identique 
 }
 ```
 
+> **Confirmé en conditions réelles** (capture du 18/09/2026, 3 occurrences) : l'événement est bien émis sur le site marchand, **avant** la redirection vers le domaine de paiement. Il porte l'objet `ecommerce` complet (`value`, `items`, `payment_type: "external"`) et, sur les 3 occurrences observées, l'objet `user`. Le site imposant la connexion avant le paiement, le cas non authentifié n'a pas pu être observé — ne pas supposer qu'il est impossible pour autant.
+>
+> C'est donc la **dernière étape de tunnel mesurable côté marchand** : le domaine de paiement ne charge pas GTM, et plus aucun événement n'est émis entre ce point et le `purchase` au retour. Utile pour mesurer le taux d'abandon au paiement (`add_payment_info` → `purchase`).
+
 ---
 
 ### `purchase` — Confirmation de commande
@@ -452,11 +460,30 @@ Les trois paramètres monétaires complémentaires sont à la **racine** du push
 }
 ```
 
+### `sign_out` — Déconnexion
+
+```javascript
+{
+  event: 'sign_out',
+  affiliation: 'FU-N',
+  user: {
+    user_id:      'CXXX…',        // dernier utilisateur connu
+    email_sha256: 'dd95e5e0…'
+  }
+}
+```
+
+> L'objet `user` porte encore l'utilisateur **qui vient de se déconnecter**. Ne pas s'en servir pour alimenter un `user_id` après cet événement.
+
+> ⚠️ **Aucun module Qweekle ne consomme `sign_out`** : contrairement à `login` et `sign_up`, il n'existe ni déclencheur ni balise pour cet événement dans les modules livrés. L'événement est bien poussé par la plateforme, mais rien ne le transmet à GA4. Pour le mesurer, créer un déclencheur Custom Event `sign_out` et une balise GA4 sur le modèle de `[GA4] login`.
+
+> `login` et `sign_up` portent aussi `method` (`"email"`) et `affiliation` à la racine.
+
 ---
 
 ## 10. Notes d'implémentation
 
-**Site de paiement** : le tunnel redirige vers un domaine de paiement dédié qui **ne charge pas GTM**. Aucun événement n'est émis pendant le paiement ; la conversion remonte via le `purchase` au retour sur la page de confirmation du site de vente. Le Conversion Linker Google Ads doit inclure le domaine de paiement dans ses domaines cross-domain pour préserver l'attribution (voir README, section 4.2).
+**Site de paiement** : le tunnel redirige vers le domaine de paiement `payments.qweekle.app`, qui **ne charge pas GTM**. Aucun événement n'est émis pendant le paiement ; la conversion remonte via le `purchase` au retour sur la page de confirmation du site de vente. Le Conversion Linker Google Ads doit inclure le domaine de paiement dans ses domaines cross-domain pour préserver l'attribution (voir README, section 4.2).
 
 **Déduplication** : chaque `purchase` contient un `transaction_id` unique. Ce champ sert d'`order_id`/`event_id` pour la déduplication entre le Pixel Meta navigateur et l'API Conversions Meta côté serveur, et pour la déduplication des conversions Google Ads. Ne jamais réutiliser un même `transaction_id`.
 
@@ -465,3 +492,59 @@ Les trois paramètres monétaires complémentaires sont à la **racine** du push
 **Données utilisateur** : `email_sha256` est calculé côté serveur par Qweekle (SHA-256 de l'email en minuscules, sans espaces). Compatible avec Meta Advanced Matching et Google Enhanced Conversions.
 
 **Conteneur mutualisé (optionnel)** : un même conteneur GTM peut être partagé entre plusieurs établissements ; la ségrégation se fait alors par `affiliation`. Dans cette configuration, toute analyse dans GA4 doit filtrer ou segmenter sur ce champ.
+
+---
+
+## 11. Validation terrain (18/09/2026)
+
+Capture Tag Assistant réalisée sur un site de démonstration Qweekle (parc de loisirs), 251 messages, 4 parcours, 3 commandes réellement payées via le PSP.
+Source : export Tag Assistant conservé en interne chez Qweekle (non versionné — il contient des identifiants de conteneur, des emails et des commandes réelles).
+
+### 11.1 Événements observés
+
+| Événement | Occurrences | Conforme à cette spec |
+|---|---|---|
+| `view_item_list` | 11 | Oui |
+| `view_item` | 2 | Oui |
+| `add_to_cart` | 4 | Oui (jusqu'à 4 lignes en un seul push) |
+| `view_cart` | 6 | Oui |
+| `begin_checkout` | 3 | Oui |
+| `add_payment_info` | 3 | Oui |
+| `purchase` | 3 | Oui |
+| `login` / `sign_up` / `sign_out` | 1 / 1 / 1 | Oui |
+| `page_view` | 21 | Oui (`page_type`, `page_title`, `page_path`) |
+| `cookie_consent_update` | 7 | Non documenté ici — événement CMP, voir README |
+| `remove_from_cart`, `add_shipping_info` | 0 | Non observés (non joués dans ces parcours) |
+
+### 11.2 Champs jamais observés sur ce site
+
+Ces champs sont spécifiés mais **absents de la totalité de la capture**. Les variables GTM correspondantes existent dans les templates et renvoient `undefined` — sans effet négatif, mais rien ne remonte.
+
+| Champ | Statut |
+|---|---|
+| `amount_due` | Jamais poussé — aucun acompte sur ce site (paiement toujours intégral) |
+| `gift_card_amount` | Jamais poussé — aucun bon cadeau utilisé pendant les tests |
+| `ecommerce.coupon` / `item.discount` | Jamais poussés — aucun code de réduction testé |
+| `ecommerce.shipping_tier` | Jamais poussé — cohérent, pas de livraison |
+| `item_variant` | Jamais poussé |
+
+> `amount_paid` **est** présent sur les 3 `purchase` et vaut exactement `ecommerce.value` (100 / 120 / 50). Le contrôle `amount_paid + amount_due + gift_card_amount = value` de la [section 6](#6-règles-monétaires--value-remises-bons-cadeaux-acomptes) est donc vérifié dans le cas simple, mais **le cas acompte reste non testé à ce jour**.
+
+### 11.3 Écarts constatés
+
+**1. `user` absent sur `begin_checkout` en visiteur non connecté.**
+Le site n'autorise pas le guest checkout, mais `begin_checkout` se déclenche **avant** la redirection vers `/auth/login`. Sur les 3 `begin_checkout` observés, 1 est parti sans objet `user`. Idem pour `add_to_cart` / `view_cart` en session anonyme.
+→ Toute variable ou tag supposant la présence de `user` doit tolérer son absence. C'est déjà le comportement des templates (variables `undefined`), mais à garder en tête pour les segments et l'Enhanced Conversions.
+
+**2. `{ ecommerce: null }` non poussé avant `view_cart` quand il suit immédiatement `add_to_cart`.**
+Observé 3 fois sur 6 `view_cart`. Sans conséquence ici car `view_cart` re-pousse un objet `ecommerce` complet (currency, value, items) qui écrase intégralement le précédent — aucune donnée résiduelle ne fuit. À corriger côté plateforme pour la conformité stricte à la [section 8](#8-événements-ecommerce), sans urgence.
+
+**3. Pas de `view_item` sur les produits « achat rapide ».**
+Les produits de la Billetterie s'achètent depuis la liste, sans fiche produit : ils génèrent `view_item_list` puis directement `add_to_cart`. Seuls les produits à configurateur (Trampoline, Plaine de jeux) émettent `view_item`.
+→ Conséquence directe : les tags déclenchés sur `view_item` (`[Meta] ViewContent`, `[Google Ads] Remarketing`) ne couvrent **pas** la Billetterie. Sur cette capture, ils n'ont fait que 2 déclenchements chacun.
+
+**4. Aucun signal d'abandon de panier.**
+Ni `remove_from_cart`, ni événement de sortie de tunnel. Pour le remarketing panier abandonné, seul le dernier couple `add_to_cart` / `view_cart` est exploitable.
+
+**5. Site en SPA.**
+La navigation interne émet `gtm.historyChange-v2` (35 occurrences) sans rechargement. Un déclencheur « All Pages » seul ne se redéclenche pas en navigation interne — c'est voulu pour la balise de configuration GA4, mais à connaître pour tout tag de page vue.
