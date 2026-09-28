@@ -69,7 +69,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -108,12 +109,12 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "navigation_context"
+                    "value": "amount_paid"
                   },
                   {
                     "type": "TEMPLATE",
                     "key": "parameterValue",
-                    "value": "{{Qweekle - DLV - navigation_context}}"
+                    "value": "{{Qweekle - DLV - amount_paid}}"
                   }
                 ]
               },
@@ -123,12 +124,12 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "checkout_type"
+                    "value": "amount_due"
                   },
                   {
                     "type": "TEMPLATE",
                     "key": "parameterValue",
-                    "value": "{{Qweekle - DLV - checkout_type}}"
+                    "value": "{{Qweekle - DLV - amount_due}}"
                   }
                 ]
               },
@@ -138,12 +139,12 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "payment_type"
+                    "value": "gift_card_amount"
                   },
                   {
                     "type": "TEMPLATE",
                     "key": "parameterValue",
-                    "value": "{{Qweekle - DLV - payment_type}}"
+                    "value": "{{Qweekle - DLV - gift_card_amount}}"
                   }
                 ]
               }
@@ -189,71 +190,8 @@
               }
             ]
           }
-        }
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "tagId": "203",
-        "name": "[GA4] search",
-        "type": "gaawe",
-        "parameter": [
-          {
-            "type": "BOOLEAN",
-            "key": "sendEcommerceData",
-            "value": "false"
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "eventName",
-            "value": "search"
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "measurementIdOverride",
-            "value": "{{Qweekle - CONST - [A CONFIGURER] GA4 Measurement ID}}"
-          },
-          {
-            "type": "LIST",
-            "key": "eventSettingsTable",
-            "list": [
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameter",
-                    "value": "search_term"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameterValue",
-                    "value": "{{Qweekle - DLV - search_term}}"
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "firingTriggerId": [
-          "102"
-        ],
-        "tagFiringOption": "ONCE_PER_EVENT",
-        "monitoringMetadata": {
-          "type": "MAP"
         },
-        "consentSettings": {
-          "consentStatus": "NEEDED",
-          "consentType": {
-            "type": "LIST",
-            "list": [
-              {
-                "type": "TEMPLATE",
-                "value": "analytics_storage"
-              }
-            ]
-          }
-        }
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -317,7 +255,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -381,7 +320,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       }
     ],
     "trigger": [
@@ -390,31 +330,8 @@
         "containerId": "0",
         "triggerId": "101",
         "name": "All Pages",
-        "type": "PAGEVIEW"
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "triggerId": "102",
-        "name": "Qweekle - CE - search",
-        "type": "CUSTOM_EVENT",
-        "customEventFilter": [
-          {
-            "type": "EQUALS",
-            "parameter": [
-              {
-                "type": "TEMPLATE",
-                "key": "arg0",
-                "value": "{{_event}}"
-              },
-              {
-                "type": "TEMPLATE",
-                "key": "arg1",
-                "value": "search"
-              }
-            ]
-          }
-        ]
+        "type": "PAGEVIEW",
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -438,7 +355,8 @@
               }
             ]
           }
-        ]
+        ],
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -462,7 +380,8 @@
               }
             ]
           }
-        ]
+        ],
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -482,11 +401,12 @@
               {
                 "type": "TEMPLATE",
                 "key": "arg1",
-                "value": "^(view_item_list|select_item|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_payment_info|purchase)$"
+                "value": "^(view_item_list|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_shipping_info|add_payment_info|purchase)$"
               }
             ]
           }
-        ]
+        ],
+        "parentFolderId": "500"
       }
     ],
     "variable": [
@@ -502,7 +422,8 @@
             "key": "value",
             "value": "G-XXXXXXXXXX"
           }
-        ]
+        ],
+        "parentFolderId": "501"
       },
       {
         "accountId": "0",
@@ -516,7 +437,8 @@
             "key": "javascript",
             "value": "function() {\n  var uid = {{Qweekle - DLV - user.user_id}};\n  return uid || undefined;\n}"
           }
-        ]
+        ],
+        "parentFolderId": "500"
       }
     ],
     "builtInVariable": [
@@ -549,6 +471,20 @@
         "containerId": "0",
         "type": "EVENT",
         "name": "Event"
+      }
+    ],
+    "folder": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "folderId": "500",
+        "name": "Qweekle"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "folderId": "501",
+        "name": "Qweekle - [A CONFIGURER]"
       }
     ]
   }

@@ -133,7 +133,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -251,7 +252,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -369,7 +371,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -487,7 +490,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -605,7 +609,8 @@
               }
             ]
           }
-        }
+        },
+        "parentFolderId": "500"
       }
     ],
     "trigger": [
@@ -614,7 +619,8 @@
         "containerId": "0",
         "triggerId": "101",
         "name": "All Pages",
-        "type": "PAGEVIEW"
+        "type": "PAGEVIEW",
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -638,7 +644,8 @@
               }
             ]
           }
-        ]
+        ],
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -662,7 +669,8 @@
               }
             ]
           }
-        ]
+        ],
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -686,7 +694,8 @@
               }
             ]
           }
-        ]
+        ],
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -710,7 +719,8 @@
               }
             ]
           }
-        ]
+        ],
+        "parentFolderId": "500"
       }
     ],
     "variable": [
@@ -726,7 +736,8 @@
             "key": "value",
             "value": "000000000000000"
           }
-        ]
+        ],
+        "parentFolderId": "501"
       },
       {
         "accountId": "0",
@@ -738,9 +749,10 @@
           {
             "type": "TEMPLATE",
             "key": "javascript",
-            "value": "function() {\n  var items = {{Qweekle - DLV - ecommerce.items}};\n  if (!items || !Array.isArray(items)) return {};\n  var props = {\n    content_ids: items.map(function(i){ return i.item_id; }),\n    contents: items.map(function(i){ return { id: i.item_id, quantity: i.quantity || 1 }; }),\n    content_type: 'product',\n    value: {{Qweekle - DLV - ecommerce.value}},\n    currency: '{{Qweekle - DLV - ecommerce.currency}}'\n  };\n  if (items[0] && items[0].item_category) {\n    props.content_category = items[0].item_category;\n  }\n  return props;\n}"
+            "value": "function() {\n  var items = {{Qweekle - DLV - ecommerce.items}};\n  if (!items || !Array.isArray(items)) return {};\n  var props = {\n    content_ids: items.map(function(i){ return i.item_id; }),\n    contents: items.map(function(i){ return { id: i.item_id, quantity: i.quantity || 1 }; }),\n    content_type: 'product',\n    value: {{Qweekle - DLV - ecommerce.value}},\n    currency: '{{Qweekle - DLV - ecommerce.currency}}'\n  };\n  if (items[0] && items[0].item_category2) {\n    props.content_category = items[0].item_category2;\n  }\n  return props;\n}"
           }
-        ]
+        ],
+        "parentFolderId": "500"
       },
       {
         "accountId": "0",
@@ -752,9 +764,10 @@
           {
             "type": "TEMPLATE",
             "key": "javascript",
-            "value": "function() {\n  var items = {{Qweekle - DLV - ecommerce.items}};\n  if (!items || !Array.isArray(items)) return {};\n  var props = {\n    content_ids: items.map(function(i){ return i.item_id; }),\n    contents: items.map(function(i){ return { id: i.item_id, quantity: i.quantity || 1 }; }),\n    content_type: 'product',\n    value: {{Qweekle - DLV - ecommerce.value}},\n    currency: '{{Qweekle - DLV - ecommerce.currency}}',\n    order_id: '{{Qweekle - DLV - ecommerce.transaction_id}}'\n  };\n  if (items[0] && items[0].item_category) {\n    props.content_category = items[0].item_category;\n  }\n  return props;\n}"
+            "value": "function() {\n  var items = {{Qweekle - DLV - ecommerce.items}};\n  if (!items || !Array.isArray(items)) return {};\n  var props = {\n    content_ids: items.map(function(i){ return i.item_id; }),\n    contents: items.map(function(i){ return { id: i.item_id, quantity: i.quantity || 1 }; }),\n    content_type: 'product',\n    value: {{Qweekle - DLV - ecommerce.value}},\n    currency: '{{Qweekle - DLV - ecommerce.currency}}',\n    order_id: '{{Qweekle - DLV - ecommerce.transaction_id}}'\n  };\n  if (items[0] && items[0].item_category2) {\n    props.content_category = items[0].item_category2;\n  }\n  return props;\n}"
           }
-        ]
+        ],
+        "parentFolderId": "500"
       }
     ],
     "builtInVariable": [
@@ -805,6 +818,20 @@
           "signature": "8eaf791b5fb175da7c334a7537d2e05d457cdb6e3cd0b9bd751ed96b6f3ea0bb",
           "galleryTemplateId": "5RM3Q"
         }
+      }
+    ],
+    "folder": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "folderId": "500",
+        "name": "Qweekle"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "folderId": "501",
+        "name": "Qweekle - [A CONFIGURER]"
       }
     ]
   }
