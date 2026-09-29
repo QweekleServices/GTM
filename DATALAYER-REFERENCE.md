@@ -4,8 +4,6 @@
 > Document complémentaire à [README.md](README.md)
 >
 > **Version** : 1.1 — 18/09/2026
->
-> Validé contre une capture Tag Assistant réelle (4 parcours, 3 commandes payées) — voir [section 11](#11-validation-terrain-18092026).
 
 Ce document décrit l'ensemble des événements poussés par la plateforme Qweekle dans le `dataLayer`, leur structure de données et les valeurs attendues.
 
@@ -23,7 +21,6 @@ Ce document décrit l'ensemble des événements poussés par la plateforme Qweek
 8. [Événements ecommerce](#8-événements-ecommerce)
 9. [Événements utilisateur](#9-événements-utilisateur)
 10. [Notes d'implémentation](#10-notes-dimplémentation)
-11. [Validation terrain (18/09/2026)](#11-validation-terrain-18092026)
 
 ---
 
