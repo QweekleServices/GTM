@@ -7,13 +7,16 @@ Sortie :  code 0 si tout est valide, 1 sinon.
 
 Verifie :
   1. Les 4 JSON sont valides, et les folders declares sont bien references.
-  2. Le tag Consent Mode Default se declenche AVANT le tag CMP Update.
+  2. Le tag Consent Mode Default se declenche sur "Initialisation du
+     consentement", donc avant le tag CMP Update et toute autre balise.
   3. Le tag CMP reste du JS valide dans l'etat livre (tous les blocs commentes).
   4. Aucun commentaire /* */ imbrique (JS ne les imbrique pas : le bloc se
      refermerait trop tot et le tag entier serait casse).
   5. Chaque bloc CMP reste du JS valide une fois decommente, en suivant
      exactement la procedure du README (retirer les /* et */ du bloc).
   6. Les extraits de code du README sont des copies exactes du JSON.
+  7. Les balises d'arrivee (GA4, Google Ads, Meta) sont relancees apres
+     consentement, une fois par page, par le meme declencheur partout.
 """
 import json, re, subprocess, sys, tempfile, textwrap
 from pathlib import Path
@@ -118,18 +121,21 @@ def _priority(tag):
     return int(p['value']) if isinstance(p, dict) else 0
 
 
+CONSENT_INIT = '2147479572'  # "Initialisation du consentement - Toutes les pages"
 _default = next((t for n, t in _tags.items() if n.endswith('Consent Mode - Default')), None)
 _update = next((t for n, t in _tags.items() if 'CMP Update' in n), None)
 if _default is None or _update is None:
     fail('tags Consent Mode Default / CMP Update introuvables')
+elif CONSENT_INIT not in _default.get('firingTriggerId', []):
+    fail('Consent Mode : le tag Default doit se declencher sur "Initialisation '
+         'du consentement - Toutes les pages" (2147479572).')
+elif (CONSENT_INIT in _update.get('firingTriggerId', [])
+      and _priority(_default) <= _priority(_update)):
+    fail(f'Consent Mode : Default (priorite {_priority(_default)}) doit passer '
+         f'AVANT CMP Update (priorite {_priority(_update)}) sur le meme '
+         'declencheur : remonter celle du tag Default.')
 else:
-    pd, pu = _priority(_default), _priority(_update)
-    if pd <= pu:
-        fail(f'Consent Mode : Default (priorite {pd}) doit se declencher AVANT '
-             f'CMP Update (priorite {pu}). Dans GTM la priorite la plus haute '
-             'passe en premier : remonter celle du tag Default.')
-    else:
-        ok(f'Default (priorite {pd}) se declenche avant CMP Update ({pu})')
+    ok('Default sur "Initialisation du consentement", avant CMP Update')
 
 print('\n== 3. Tag CMP : etat livre ==')
 html = cmp_tag_html()
@@ -175,6 +181,9 @@ print('\n== 6. Extraits README vs source JSON ==')
 readme = (ROOT / 'README.md').read_text(encoding='utf-8')
 sec = readme[readme.index('### 4.1 Consent Mode'):readme.index('### 4.2 Google Ads')]
 fences = re.findall(r'```javascript\n(.*?)```', sec, re.S)
+if fences and 'qweekle_consent_update' not in fences[0]:
+    fail('README section 4.1 : la fonction commune doit montrer le push de '
+         "l'evenement qweekle_consent_update")
 if len(fences) < 5:
     fail(f'section 4.1 : {len(fences)} blocs de code, 5 attendus '
          '(fonction commune + 4 CMP)')
@@ -188,6 +197,58 @@ else:
                  'regenerer depuis qweekle-1-base.json')
         else:
             ok(f'README {name} identique au JSON')
+
+print('\n== 7. Relance des balises d arrivee apres consentement ==')
+RELAUNCH = 'Qweekle - CE - Relance apres consentement'
+LANDING = {
+    'qweekle-2-ga4.json': ['[GA4] Configuration'],
+    'qweekle-3-meta.json': ['[Meta] Pixel Base + PageView'],
+    'qweekle-4-ads.json': ['[Google Ads] Configuration',
+                           '[Google Ads] Conversion Linker'],
+}
+patterns = {}
+for m in MODULES:
+    cv = json.loads((ROOT / m).read_text(encoding='utf-8'))['containerVersion']
+    trig = {t['name']: t for t in cv.get('trigger', [])}
+    relaunch = trig.get(RELAUNCH)
+    if relaunch is None:
+        fail(f'{m} : declencheur "{RELAUNCH}" absent')
+        continue
+    patterns[m] = next((p['value'] for f in relaunch.get('customEventFilter', [])
+                        for p in f.get('parameter', []) if p['key'] == 'arg1'), None)
+    all_pages = trig['All Pages']['triggerId']
+    for name in LANDING.get(m, []):
+        tag = next((t for t in cv['tag'] if t['name'] == name), None)
+        if tag is None:
+            fail(f'{m} : tag {name} introuvable')
+            continue
+        ids = tag.get('firingTriggerId', [])
+        if all_pages not in ids or relaunch['triggerId'] not in ids:
+            fail(f'{m} : {name} doit se declencher sur All Pages ET sur "{RELAUNCH}"')
+        elif tag.get('tagFiringOption') != 'ONCE_PER_LOAD':
+            fail(f'{m} : {name} doit etre "Une fois par page" (ONCE_PER_LOAD), '
+                 'sinon un visiteur deja consentant le declencherait deux fois')
+        else:
+            ok(f'{m} : {name} relance apres consentement, une fois par page')
+
+if len(set(patterns.values())) > 1:
+    fail('expression du declencheur de relance differente selon les modules : '
+         + ' / '.join(f'{m} = {p}' for m, p in patterns.items()))
+elif patterns:
+    pattern = next(iter(patterns.values()))
+    if not pattern or 'qweekle_consent_update' not in pattern:
+        fail('le declencheur de relance doit ecouter qweekle_consent_update')
+    elif pattern not in readme:
+        fail('README section 6.1 : expression du declencheur de relance absente '
+             'ou differente du JSON')
+    else:
+        ok('expression de relance identique dans les 4 modules et le README')
+
+if "event: 'qweekle_consent_update'" not in active:
+    fail('qweekleUpdateConsent() doit pousser qweekle_consent_update '
+         '(partie commune active du tag CMP)')
+else:
+    ok('qweekleUpdateConsent() pousse qweekle_consent_update')
 
 print('\n' + '=' * 60)
 if errors:

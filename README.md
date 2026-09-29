@@ -1,6 +1,6 @@
 # Documentation — Modules GTM Qweekle
 
-**Version** : 1.1 — 18/09/2026
+**Version** : 1.2 — 29/09/2026
 
 **Audience** : clients Qweekle et agences marketing
 
@@ -134,6 +134,8 @@ La procédure est identique pour les 4 modules.
 
 > 💡 **Conseil** : créer un espace de travail dédié avant l'import (GTM → Espaces de travail → `+`) pour pouvoir isoler les changements et les annuler si nécessaire.
 
+> 🔄 **Mise à jour depuis une version précédente** : ré-importez chaque module en choisissant **Fusionner**, puis l'option qui **écrase les éléments en conflit** (et non celle qui les renomme, qui créerait des doublons). Seuls les éléments Qweekle de même nom sont remplacés ; le reste du conteneur n'est pas touché. Le tag `[Qweekle] Consent Mode - CMP Update [A CONFIGURER]` étant remplacé par sa nouvelle version, **décommentez à nouveau le bloc de votre CMP** (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)).
+
 ---
 
 ## 3. Mise en route minimale
@@ -161,7 +163,11 @@ Aucun identifiant à renseigner. La seule action requise est de connecter votre 
 
 > **Ne jamais commenter la « PARTIE COMMUNE »** en haut du tag : elle définit la fonction `qweekleUpdateConsent()` qu'appellent tous les blocs CMP. Seuls les blocs CMP se décommentent.
 
-> Si votre CMP gère déjà le Consent Mode nativement via son propre template GTM (cas de Cookiebot ou CookieYes installés comme tags GTM), **laisser tous les blocs commentés** — sinon le consentement serait mis à jour deux fois.
+> Si votre CMP gère déjà le Consent Mode nativement via son propre template GTM (cas de Cookiebot ou CookieYes installés comme tags GTM), **laisser tous les blocs commentés** — sinon le consentement serait mis à jour deux fois. Placez ce template sur le déclencheur **Initialisation du consentement - Toutes les pages**, et réglez son **consentement par défaut sur « refusé »** pour l'analyse et la publicité (dans CookieYes : *Default Consent Settings* → toutes les catégories sur *Disabled*, sauf *Necessary*). Cochez aussi les options de transmission des informations de clic dans les URL et d'anonymisation des données publicitaires (*Pass ad click information through URLs*, *Redact ads data* dans CookieYes).
+
+> ⚠️ C'est le template de la CMP qui doit poser le consentement par défaut : il s'exécute avant tout autre événement. Le tag `[Qweekle] Consent Mode - Default` n'est qu'un filet de sécurité. Étant en HTML personnalisé, il n'est traité qu'après le chargement du conteneur. Un template réglé par défaut sur « accordé » laisse donc partir les balises avant tout choix du visiteur.
+
+> Les balises d'arrivée (GA4, Google Ads, Meta) se déclenchent dès que le visiteur accepte les cookies, grâce au déclencheur `Qweekle - CE - Relance apres consentement`. Il reconnaît les blocs CMP de ce tag ainsi que les templates Cookiebot, CookieYes, Axeptio et Didomi. Pour une autre CMP, voir [section 4.1](#41-consent-mode--intégration-cmp-détaillée).
 
 Pour les détails de personnalisation par CMP (clés Axeptio, IDs Didomi), voir [section 4.1](#41-consent-mode--intégration-cmp-détaillée).
 
@@ -239,6 +245,7 @@ Avant de passer à la validation, vérifier que chaque étape est complète.
 **Module Base — obligatoire**
 - [ ] Module Base importé en mode **Fusion**
 - [ ] Bannière cookies (CMP) décommentée dans le tag `[Qweekle] Consent Mode - CMP Update`
+- [ ] Template CMP (si vous en utilisez un) placé sur le déclencheur **Initialisation du consentement - Toutes les pages**, avec le consentement par défaut sur **refusé** (analyse et publicité)
 
 **Module GA4** *(si utilisé)*
 - [ ] Module GA4 importé en mode **Fusion**
@@ -259,6 +266,7 @@ Avant de passer à la validation, vérifier que chaque étape est complète.
 **Validation**
 - [ ] Mode Aperçu GTM testé (section 5.1)
 - [ ] Tags bloqués avant acceptation cookies ✓
+- [ ] Première visite testée : balises d'arrivée déclenchées à l'acceptation des cookies (section 5.1) ✓
 - [ ] Événement `purchase` vérifié dans chaque plateforme ✓
 - [ ] Version publiée dans GTM ✓
 
@@ -281,10 +289,12 @@ function qweekleUpdateConsent(analyticsConsent, advertisingConsent) {
     'ad_user_data':       advertisingConsent ? 'granted' : 'denied',
     'ad_personalization': advertisingConsent ? 'granted' : 'denied'
   });
+  // Relance les balises d'arrivée bloquées au chargement (voir plus bas)
+  window.dataLayer.push({ event: 'qweekle_consent_update' });
 }
 ```
 
-Chaque bloc CMP se contente donc d'appeler `qweekleUpdateConsent(<analytics>, <publicité>)` avec les booléens de sa propre API.
+Chaque bloc CMP se contente donc d'appeler `qweekleUpdateConsent(<analytics>, <publicité>)` avec les booléens de sa propre API. La fonction met à jour le consentement, puis pousse l'événement `qweekle_consent_update`, qui relance les balises d'arrivée (voir [Relance des balises après consentement](#relance-des-balises-après-consentement)).
 
 ---
 
@@ -422,7 +432,23 @@ document.addEventListener(
 
 ---
 
-**Autre CMP** : implémenter la même logique — écouter l'événement de consentement de la CMP, puis appeler `gtag('consent', 'update', { ... })` avec `'granted'` ou `'denied'` selon les choix de l'utilisateur.
+**Autre CMP** : implémenter la même logique dans un nouveau bloc du tag — écouter l'événement de consentement de la CMP, puis appeler `qweekleUpdateConsent(<analytics>, <publicité>)`. La fonction met à jour le Consent Mode et relance les balises d'arrivée.
+
+#### Relance des balises après consentement
+
+Un nouveau visiteur n'a pas encore donné son accord quand la page se charge : les balises d'arrivée (`[GA4] Configuration`, `[Google Ads] Configuration`, `[Google Ads] Conversion Linker`, `[Meta] Pixel Base + PageView`) sont alors bloquées. La Vente en ligne ne rechargeant pas la page à chaque clic, elles ne repartiraient qu'au retour du paiement, sans les paramètres de campagne de l'URL d'arrivée (`gclid`, `utm_*`, `fbclid`).
+
+Le déclencheur `Qweekle - CE - Relance apres consentement` les relance dès l'acceptation des cookies, **une fois par page** : un visiteur qui a déjà consenti est mesuré dès le chargement, comme avant. Il écoute :
+
+| Événement | Poussé par |
+|---|---|
+| `qweekle_consent_update` | La fonction commune `qweekleUpdateConsent()` (blocs CMP de ce tag) |
+| `cookie_consent_update` | Templates GTM Cookiebot et CookieYes |
+| `axeptio_update` | Axeptio |
+| `didomi-consent` | Didomi |
+| `page_view` | Qweekle, à chaque changement de page. Filet de sécurité : la relance a alors lieu à la page suivante, sans les paramètres de campagne |
+
+Si votre CMP pousse un autre événement lors de la mise à jour du consentement, repérez son nom dans l'onglet **Data Layer** du mode Aperçu, puis ajoutez-le à l'expression régulière du déclencheur (GTM → **Déclencheurs** → `Qweekle - CE - Relance apres consentement`).
 
 ---
 
@@ -546,6 +572,7 @@ Rejouer un parcours complet sur le **domaine live** en mode Aperçu (voir [secti
 | Tags Consent Mode | Se déclenchent en premier sur chaque page |
 | Tags GA4/Meta/Ads **avant** acceptation cookies | Ne se déclenchent **pas** |
 | Tags GA4/Meta/Ads **après** acceptation cookies | Se déclenchent sur les bons événements |
+| **Première visite** : cookies effacés, URL d'arrivée avec `?gclid=test&utm_source=test` | À l'acceptation des cookies, `[GA4] Configuration`, `[Google Ads] Configuration`, `[Google Ads] Conversion Linker` et `[Meta] Pixel Base + PageView` se déclenchent sur `Qweekle - CE - Relance apres consentement` |
 | `Qweekle - DLV - ecommerce.value` sur purchase | Valeur en euros (pas en centimes) |
 | `Qweekle - DLV - ecommerce.items` | Tableau non vide avec `item_id`, `price`, `quantity` |
 
@@ -627,23 +654,29 @@ Ces variables lisent directement les clés poussées par Qweekle dans le `dataLa
 | `Qweekle - CE - login` | Custom Event | `login` |
 | `Qweekle - CE - sign_up` | Custom Event | `sign_up` |
 | `Qweekle - CE - Tous les evenements ecommerce` | Custom Event (regex) | Tous les événements ecommerce en une seule règle |
+| `Qweekle - CE - Relance apres consentement` | Custom Event (regex) | Mise à jour du consentement ou, à défaut, `page_view` (voir [section 4.1](#relance-des-balises-après-consentement)) |
 
 Le trigger regex écoute le pattern :
 ```
 ^(view_item_list|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_shipping_info|add_payment_info|purchase)$
 ```
 
+Le trigger de relance écoute le pattern :
+```
+^(qweekle_consent_update|cookie_consent_update|axeptio_update|didomi-consent|page_view)$
+```
+
 #### Tags
 
 **`[Qweekle] Consent Mode - Default`**
 - Type : HTML personnalisé
-- Déclenchement : `All Pages`, `ONCE_PER_LOAD`, sans condition de consentement
-- Rôle : initialise le Consent Mode Google en plaçant tous les états en `denied` avant toute interaction de l'utilisateur. Active également `ads_data_redaction` et `url_passthrough` pour conserver une mesure partielle même sans consentement.
+- Déclenchement : `Initialisation du consentement - Toutes les pages` (déclencheur intégré de GTM), `ONCE_PER_LOAD`, sans condition de consentement.
+- Rôle : filet de sécurité qui place tous les états en `denied` et active `ads_data_redaction` et `url_passthrough`. Étant en HTML personnalisé, ses commandes ne sont traitées qu'après le chargement du conteneur : il ne remplace pas le consentement par défaut posé par le template de votre CMP (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)).
 
 **`[Qweekle] Consent Mode - CMP Update [A CONFIGURER]`**
 - Type : HTML personnalisé
 - Déclenchement : `All Pages`, `ONCE_PER_LOAD`, sans condition de consentement
-- Rôle : écoute la décision de l'utilisateur via la CMP et met à jour les états de consentement. Contient les blocs pour Axeptio, Didomi, Cookiebot et CookieYes à décommenter (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)).
+- Rôle : écoute la décision de l'utilisateur via la CMP et met à jour les états de consentement. Contient les blocs pour Axeptio, Didomi, Cookiebot et CookieYes à décommenter (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)). Après chaque mise à jour, la fonction commune pousse l'événement `qweekle_consent_update`, qui relance les balises d'arrivée.
 
 ---
 
@@ -668,7 +701,7 @@ Retourne le `user.user_id` depuis le dataLayer, ou `undefined` si l'utilisateur 
 
 **`[GA4] Configuration`**
 - Type : Balise Google (`googtag`)
-- Déclenchement : `All Pages`
+- Déclenchement : `All Pages` et `Qweekle - CE - Relance apres consentement`, une fois par page
 - Consentement requis : `analytics_storage`
 - Paramètre `tagId` : `{{Qweekle - CONST - [A CONFIGURER] GA4 Measurement ID}}`
 - Envoie le `user_id` si l'utilisateur est connecté
@@ -718,7 +751,7 @@ Tous les tags Meta partagent : `disablePushState: true`, `advancedMatching: true
 
 | Tag | Déclencheur | Événement Meta |
 |---|---|---|
-| `[Meta] Pixel Base + PageView` | `All Pages` | `PageView` |
+| `[Meta] Pixel Base + PageView` | `All Pages` et `Qweekle - CE - Relance apres consentement` (une fois par page) | `PageView` |
 | `[Meta] ViewContent` | `Qweekle - CE - view_item` | `ViewContent` |
 | `[Meta] AddToCart` | `Qweekle - CE - add_to_cart` | `AddToCart` |
 | `[Meta] InitiateCheckout` | `Qweekle - CE - begin_checkout` | `InitiateCheckout` |
@@ -761,8 +794,8 @@ Le cross-domain est activé — les domaines sont lus depuis les trois variables
 
 | Tag | Déclencheur | Consentement |
 |---|---|---|
-| `[Google Ads] Configuration` | `All Pages` | `ad_storage`, `ad_user_data` |
-| `[Google Ads] Conversion Linker` | `All Pages` | `ad_storage` |
+| `[Google Ads] Configuration` | `All Pages` et `Qweekle - CE - Relance apres consentement` (une fois par page) | `ad_storage`, `ad_user_data` |
+| `[Google Ads] Conversion Linker` | `All Pages` et `Qweekle - CE - Relance apres consentement` (une fois par page) | `ad_storage` |
 | `[Google Ads] Conversion - Purchase` | `Qweekle - CE - purchase` | `ad_storage`, `ad_user_data` |
 | `[Google Ads] Remarketing` | `Qweekle - CE - view_item` | `ad_storage`, `ad_user_data` |
 
@@ -803,7 +836,10 @@ La conversion Purchase envoie valeur, devise, order_id et les données Enhanced 
 ## 8. Dépannage
 
 **Les tags se déclenchent avant le consentement**
-Vérifier que la CMP est bien décommentée dans le tag `[Qweekle] Consent Mode - CMP Update` (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)). Vérifier aussi l'ordre des deux tags de consentement : `Consent Mode - Default` doit avoir une **priorité supérieure** à `Consent Mode - CMP Update` (100 contre 10 dans les modules livrés), car dans GTM la priorité la plus haute se déclenche en premier.
+Vérifier que la CMP est bien décommentée dans le tag `[Qweekle] Consent Mode - CMP Update` (voir [section 3.1.1](#311-consent-mode--pourquoi-et-comment-configurer)). Si votre CMP est installée via son template GTM, vérifier qu'il est sur **Initialisation du consentement - Toutes les pages** et que son **consentement par défaut est sur « refusé »**. Un défaut sur « accordé » laisse partir les balises avant le choix du visiteur, selon la vitesse de chargement de la bannière.
+
+**Les nouveaux visiteurs de vos campagnes ne sont pas attribués** (sessions en direct ou en recherche naturelle dans GA4, conversions Google Ads non rattachées aux clics)
+Tester une première visite en mode Aperçu, cookies effacés, avec une URL d'arrivée portant `?gclid=test&utm_source=test`. À l'acceptation des cookies, les balises d'arrivée doivent se déclencher sur `Qweekle - CE - Relance apres consentement`. Si elles ne partent qu'à la page suivante (sur `page_view`), votre CMP pousse un événement que le déclencheur ne connaît pas : repérer son nom dans l'onglet **Data Layer** du mode Aperçu, puis l'ajouter à l'expression régulière du déclencheur (voir [section 4.1](#relance-des-balises-après-consentement)).
 
 **Une variable CJS retourne `undefined` ou `{}`**
 Ouvrir la console navigateur, taper `dataLayer` et vérifier que `user.user_id` et `user.email_sha256` sont bien présents. Si les champs sont vides, les variables retournent `undefined` intentionnellement — aucune donnée n'est envoyée vers les plateformes.

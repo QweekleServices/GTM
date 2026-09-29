@@ -112,7 +112,8 @@
           }
         ],
         "firingTriggerId": [
-          "101"
+          "101",
+          "106"
         ],
         "tagFiringOption": "ONCE_PER_LOAD",
         "monitoringMetadata": {
@@ -716,6 +717,31 @@
                 "type": "TEMPLATE",
                 "key": "arg1",
                 "value": "purchase"
+              }
+            ]
+          }
+        ],
+        "parentFolderId": "500"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "triggerId": "106",
+        "name": "Qweekle - CE - Relance apres consentement",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "MATCH_REGEX",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "^(qweekle_consent_update|cookie_consent_update|axeptio_update|didomi-consent|page_view)$"
               }
             ]
           }

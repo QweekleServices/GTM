@@ -36,7 +36,7 @@
           }
         ],
         "firingTriggerId": [
-          "101"
+          "2147479572"
         ],
         "tagFiringOption": "ONCE_PER_LOAD",
         "monitoringMetadata": {
@@ -65,7 +65,7 @@
           {
             "type": "TEMPLATE",
             "key": "html",
-            "value": "<script>\n/*\n  ================================================================\n  QWEEKLE - INTEGRATION CMP\n\n  INSTRUCTIONS :\n  - La partie commune ci-dessous doit rester active.\n  - Decommenter UNIQUEMENT le bloc correspondant a votre CMP.\n  - Laisser tous les autres blocs commentes.\n  - Si la CMP gere deja Google Consent Mode via GTM,\n    laisser tous les blocs CMP commentes.\n  ================================================================\n*/\n\n\n/*\n  ================================================================\n  PARTIE COMMUNE - NE PAS COMMENTER\n  ================================================================\n*/\n\nwindow.dataLayer = window.dataLayer || [];\n\nfunction qweekleUpdateConsent(analyticsConsent, advertisingConsent) {\n\n  function gtag() {\n    window.dataLayer.push(arguments);\n  }\n\n  gtag('consent', 'update', {\n    'analytics_storage':\n      analyticsConsent ? 'granted' : 'denied',\n\n    'ad_storage':\n      advertisingConsent ? 'granted' : 'denied',\n\n    'ad_user_data':\n      advertisingConsent ? 'granted' : 'denied',\n\n    'ad_personalization':\n      advertisingConsent ? 'granted' : 'denied'\n  });\n\n}\n\n\n// ================================================================\n// AXEPTIO\n// ================================================================\n/*\n  void 0 === window._axcb && (window._axcb = []);\n\n  window._axcb.push(function(sdk) {\n\n    sdk.on('cookies:complete', function(choices) {\n\n      qweekleUpdateConsent(\n        choices.google_analytics === true,\n        choices.meta_pixel === true ||\n        choices.google_ads === true\n      );\n\n    });\n\n  });\n*/\n\n\n// ================================================================\n// DIDOMI\n// ================================================================\n/*\n  window.didomiOnReady = window.didomiOnReady || [];\n\n  window.didomiOnReady.push(function(Didomi) {\n\n    qweekleUpdateConsent(\n      Didomi.getUserConsentStatusForPurpose('analytics'),\n      Didomi.getUserConsentStatusForPurpose('advertising')\n    );\n\n  });\n*/\n\n\n// ================================================================\n// COOKIEBOT\n// ================================================================\n/*\n  window.addEventListener(\n    'CookiebotOnAccept',\n    function() {\n\n      qweekleUpdateConsent(\n        Cookiebot.consent.statistics === true,\n        Cookiebot.consent.marketing === true\n      );\n\n    },\n    false\n  );\n*/\n\n\n// ================================================================\n// COOKIEYES\n// ================================================================\n/*\n  function qweekleCookieYesList(accepted) {\n\n    if (typeof accepted === 'string') {\n      accepted = accepted.split(',');\n    }\n\n    if (!accepted || !accepted.length) {\n      return null;\n    }\n\n    var out = [];\n\n    for (var i = 0; i < accepted.length; i++) {\n      out.push(String(accepted[i]).trim());\n    }\n\n    return out;\n  }\n\n\n  function qweekleCookieYesConsent(detail) {\n\n    if (!detail) {\n      return;\n    }\n\n    var list = qweekleCookieYesList(detail.accepted);\n\n    if (list) {\n\n      qweekleUpdateConsent(\n        list.indexOf('analytics') !== -1,\n        list.indexOf('advertisement') !== -1\n      );\n\n      return;\n    }\n\n    if (detail.categories) {\n\n      qweekleUpdateConsent(\n        detail.categories.analytics === true,\n        detail.categories.advertisement === true\n      );\n\n      return;\n    }\n\n    // Format de payload non reconnu : on ne touche pas au consentement\n    // plutot que de le passer a 'denied' a tort.\n  }\n\n\n  document.addEventListener(\n    'cookieyes_banner_load',\n    function(eventData) {\n      qweekleCookieYesConsent(eventData.detail);\n    }\n  );\n\n\n  document.addEventListener(\n    'cookieyes_consent_update',\n    function(eventData) {\n      qweekleCookieYesConsent(eventData.detail);\n    }\n  );\n*/\n\n</script>"
+            "value": "<script>\n/*\n  ================================================================\n  QWEEKLE - INTEGRATION CMP\n\n  INSTRUCTIONS :\n  - La partie commune ci-dessous doit rester active.\n  - Decommenter UNIQUEMENT le bloc correspondant a votre CMP.\n  - Laisser tous les autres blocs commentes.\n  - Si la CMP gere deja Google Consent Mode via GTM,\n    laisser tous les blocs CMP commentes.\n  ================================================================\n*/\n\n\n/*\n  ================================================================\n  PARTIE COMMUNE - NE PAS COMMENTER\n  ================================================================\n*/\n\nwindow.dataLayer = window.dataLayer || [];\n\nfunction qweekleUpdateConsent(analyticsConsent, advertisingConsent) {\n\n  function gtag() {\n    window.dataLayer.push(arguments);\n  }\n\n  gtag('consent', 'update', {\n    'analytics_storage':\n      analyticsConsent ? 'granted' : 'denied',\n\n    'ad_storage':\n      advertisingConsent ? 'granted' : 'denied',\n\n    'ad_user_data':\n      advertisingConsent ? 'granted' : 'denied',\n\n    'ad_personalization':\n      advertisingConsent ? 'granted' : 'denied'\n  });\n\n  // Signale la mise a jour : les balises d'arrivee (GA4, Google Ads,\n  // Meta), bloquees au chargement de la page faute de consentement,\n  // se declenchent alors, tant que l'URL porte encore gclid, utm, fbclid.\n  window.dataLayer.push({ event: 'qweekle_consent_update' });\n\n}\n\n\n// ================================================================\n// AXEPTIO\n// ================================================================\n/*\n  void 0 === window._axcb && (window._axcb = []);\n\n  window._axcb.push(function(sdk) {\n\n    sdk.on('cookies:complete', function(choices) {\n\n      qweekleUpdateConsent(\n        choices.google_analytics === true,\n        choices.meta_pixel === true ||\n        choices.google_ads === true\n      );\n\n    });\n\n  });\n*/\n\n\n// ================================================================\n// DIDOMI\n// ================================================================\n/*\n  window.didomiOnReady = window.didomiOnReady || [];\n\n  window.didomiOnReady.push(function(Didomi) {\n\n    qweekleUpdateConsent(\n      Didomi.getUserConsentStatusForPurpose('analytics'),\n      Didomi.getUserConsentStatusForPurpose('advertising')\n    );\n\n  });\n*/\n\n\n// ================================================================\n// COOKIEBOT\n// ================================================================\n/*\n  window.addEventListener(\n    'CookiebotOnAccept',\n    function() {\n\n      qweekleUpdateConsent(\n        Cookiebot.consent.statistics === true,\n        Cookiebot.consent.marketing === true\n      );\n\n    },\n    false\n  );\n*/\n\n\n// ================================================================\n// COOKIEYES\n// ================================================================\n/*\n  function qweekleCookieYesList(accepted) {\n\n    if (typeof accepted === 'string') {\n      accepted = accepted.split(',');\n    }\n\n    if (!accepted || !accepted.length) {\n      return null;\n    }\n\n    var out = [];\n\n    for (var i = 0; i < accepted.length; i++) {\n      out.push(String(accepted[i]).trim());\n    }\n\n    return out;\n  }\n\n\n  function qweekleCookieYesConsent(detail) {\n\n    if (!detail) {\n      return;\n    }\n\n    var list = qweekleCookieYesList(detail.accepted);\n\n    if (list) {\n\n      qweekleUpdateConsent(\n        list.indexOf('analytics') !== -1,\n        list.indexOf('advertisement') !== -1\n      );\n\n      return;\n    }\n\n    if (detail.categories) {\n\n      qweekleUpdateConsent(\n        detail.categories.analytics === true,\n        detail.categories.advertisement === true\n      );\n\n      return;\n    }\n\n    // Format de payload non reconnu : on ne touche pas au consentement\n    // plutot que de le passer a 'denied' a tort.\n  }\n\n\n  document.addEventListener(\n    'cookieyes_banner_load',\n    function(eventData) {\n      qweekleCookieYesConsent(eventData.detail);\n    }\n  );\n\n\n  document.addEventListener(\n    'cookieyes_consent_update',\n    function(eventData) {\n      qweekleCookieYesConsent(eventData.detail);\n    }\n  );\n*/\n\n</script>"
           },
           {
             "type": "BOOLEAN",
@@ -389,6 +389,31 @@
                 "type": "TEMPLATE",
                 "key": "arg1",
                 "value": "^(view_item_list|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_shipping_info|add_payment_info|purchase)$"
+              }
+            ]
+          }
+        ],
+        "parentFolderId": "500"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "triggerId": "116",
+        "name": "Qweekle - CE - Relance apres consentement",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "MATCH_REGEX",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "^(qweekle_consent_update|cookie_consent_update|axeptio_update|didomi-consent|page_view)$"
               }
             ]
           }
