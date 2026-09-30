@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 - 30/09/2026
+ - Balises d'arrivée (`[GA4] Configuration`, `[Google Ads] Configuration`, `[Google Ads] Conversion Linker`, `[Meta] Pixel Base + PageView`) : elles ne se déclenchent plus sur All Pages, mais sur deux déclencheurs conditionnés à l'état du consentement, une fois par page. `Qweekle - CE - Arrivee analytics accorde` et `Qweekle - CE - Arrivee publicite accordee` écoutent `gtm.js`, `cookie_consent_update`, `axeptio_update`, `didomi-consent` et `page_view`. Sur la Vente en ligne (SPA), un nouveau visiteur qui acceptait les cookies après le chargement n'était pas mesuré à l'arrivée : `gclid`, `utm_*` et `fbclid` étaient perdus. Une simple relance sur l'événement de consentement ne suffit pas : GTM considère une balise « Une fois par page » bloquée par le consentement comme déjà déclenchée (constaté en test)
+ - Nouvelles variables `Qweekle - CONSENT - analytics_storage`, `ad_storage` et `ad_user_data`, basées sur le modèle de la galerie GTM Consent State (Ayudante), embarqué dans les modules
+ - Module Base : suppression des tags `[Qweekle] Consent Mode - Default` et `[Qweekle] Consent Mode - CMP Update` (et, dans ce module, du déclencheur All Pages et du dossier `[A CONFIGURER]`). Le consentement est désormais géré par le modèle GTM de la CMP, seul capable de poser le consentement par défaut à temps : constaté en test, le tag Default en HTML personnalisé n'était traité qu'après le chargement du conteneur
+ - README : installation de la CMP avec son modèle GTM (3.1.1, 4.1), consentement par défaut « refusé » (constaté en test : un modèle CookieYes réglé par défaut sur « accordé » laissait partir les balises avant le choix du visiteur), déclencheurs d'arrivée (4.1, 5.1, 6.x, checklist, dépannage), procédure de mise à jour d'un module
+ - tools/validate.py : réécrit pour cette architecture (module Base sans tag de consentement, déclencheurs d'arrivée, variables et modèle de consentement)
+
 ## 1.1.0 - 18/09/2026
  - Tag `Consent Mode - CMP Update` : refonte autour d'une fonction commune `qweekleUpdateConsent()`, ajout du bloc CookieYes (4 CMP couvertes)
  - Consent Mode : priorite du tag Default remontee a 100 — il se declenchait APRES le tag CMP Update, ce qui pouvait ecraser le consentement mis a jour par la CMP
