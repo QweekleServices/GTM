@@ -31,8 +31,7 @@
           }
         ],
         "firingTriggerId": [
-          "101",
-          "104"
+          "118"
         ],
         "tagFiringOption": "ONCE_PER_LOAD",
         "monitoringMetadata": {
@@ -116,8 +115,7 @@
           }
         ],
         "firingTriggerId": [
-          "101",
-          "104"
+          "118"
         ],
         "tagFiringOption": "ONCE_PER_LOAD",
         "monitoringMetadata": {
@@ -293,14 +291,6 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "101",
-        "name": "All Pages",
-        "type": "PAGEVIEW",
-        "parentFolderId": "500"
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
         "triggerId": "102",
         "name": "Qweekle - CE - purchase",
         "type": "CUSTOM_EVENT",
@@ -351,8 +341,8 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "104",
-        "name": "Qweekle - CE - Relance apres consentement",
+        "triggerId": "118",
+        "name": "Qweekle - CE - Arrivee publicite accordee",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
           {
@@ -366,7 +356,39 @@
               {
                 "type": "TEMPLATE",
                 "key": "arg1",
-                "value": "^(qweekle_consent_update|cookie_consent_update|axeptio_update|didomi-consent|page_view)$"
+                "value": "^(gtm\\.js|cookie_consent_update|axeptio_update|didomi-consent|page_view)$"
+              }
+            ]
+          }
+        ],
+        "filter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{Qweekle - CONSENT - ad_storage}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "true"
+              }
+            ]
+          },
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{Qweekle - CONSENT - ad_user_data}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "true"
               }
             ]
           }
@@ -464,6 +486,48 @@
           }
         ],
         "parentFolderId": "501"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "302",
+        "name": "Qweekle - CONSENT - ad_storage",
+        "type": "cvt_M6BW3",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "selectTarget",
+            "value": "any"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "getType",
+            "value": "ad_storage"
+          }
+        ],
+        "parentFolderId": "500",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "303",
+        "name": "Qweekle - CONSENT - ad_user_data",
+        "type": "cvt_M6BW3",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "selectTarget",
+            "value": "any"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "getType",
+            "value": "ad_user_data"
+          }
+        ],
+        "parentFolderId": "500",
+        "formatValue": {}
       }
     ],
     "builtInVariable": [
@@ -496,6 +560,24 @@
         "containerId": "0",
         "type": "EVENT",
         "name": "Event"
+      }
+    ],
+    "customTemplate": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "templateId": "10",
+        "name": "GTM Consent State",
+        "fingerprint": "1790755271831",
+        "templateData": "___TERMS_OF_SERVICE___\n\nBy creating or modifying this file you agree to Google Tag Manager's Community\nTemplate Gallery Developer Terms of Service available at\nhttps://developers.google.com/tag-manager/gallery-tos (or such other URL as\nGoogle may provide), as modified from time to time.\n\n\n___INFO___\n\n{\n  \"type\": \"MACRO\",\n  \"id\": \"cvt_M6BW3\",\n  \"version\": 1,\n  \"displayName\": \"GTM Consent State\",\n  \"categories\": [\n    \"UTILITY\"\n  ],\n  \"description\": \"Get the status of each type of Consent Mode implemented in Google Tag Manager.\",\n  \"containerContexts\": [\n    \"WEB\"\n  ],\n  \"brand\": {\n    \"displayName\": \"Ayudante\",\n    \"id\": \"github.com_Ayudante\"\n  }\n}\n\n\n___TEMPLATE_PARAMETERS___\n\n[\n  {\n    \"type\": \"RADIO\",\n    \"name\": \"selectTarget\",\n    \"radioItems\": [\n      {\n        \"value\": \"all\",\n        \"displayValue\": \"All types\"\n      },\n      {\n        \"value\": \"any\",\n        \"displayValue\": \"Any type\"\n      }\n    ],\n    \"simpleValueType\": true,\n    \"defaultValue\": \"all\",\n    \"help\": \"Select the name of the Consent Type you want to retrieve.\\u003cbr\\u003e\\nIf you select \\\"\\u003cb\\u003eAll types\\u003c/b\\u003e\\\", you will get the status of the five types provided by default as an \\u003cb\\u003eobject\\u003c/b\\u003e.\\u003cbr\\u003e\\nif you select \\u003cb\\u003e\\\"Any type\\\"\\u003c/b\\u003e, you will get the value of the type as \\u003cb\\u003etrue/false\\u003c/b\\u003e.\",\n    \"displayName\": \"Get type\"\n  },\n  {\n    \"type\": \"SELECT\",\n    \"name\": \"getType\",\n    \"macrosInSelect\": false,\n    \"selectItems\": [\n      {\n        \"value\": \"ad_storage\",\n        \"displayValue\": \"ad_storage\"\n      },\n      {\n        \"value\": \"analytics_storage\",\n        \"displayValue\": \"analytics_storage\"\n      },\n      {\n        \"value\": \"functionality_storage\",\n        \"displayValue\": \"functionality_storage\"\n      },\n      {\n        \"value\": \"personalization_storage\",\n        \"displayValue\": \"personalization_storage\"\n      },\n      {\n        \"value\": \"security_storage\",\n        \"displayValue\": \"security_storage\"\n      },\n      {\n        \"value\": \"ad_user_data\",\n        \"displayValue\": \"ad_user_data\"\n      },\n      {\n        \"value\": \"ad_personalization\",\n        \"displayValue\": \"ad_personalization\"\n      },\n      {\n        \"value\": \"custom\",\n        \"displayValue\": \"\"\n      }\n    ],\n    \"simpleValueType\": true,\n    \"alwaysInSummary\": true,\n    \"help\": \"If you want to get a type that is not provided by default, select the blank box and enter the name of the type you want to get.\",\n    \"defaultValue\": \"ad_storage\",\n    \"enablingConditions\": [\n      {\n        \"paramName\": \"selectTarget\",\n        \"paramValue\": \"all\",\n        \"type\": \"NOT_EQUALS\"\n      }\n    ],\n    \"displayName\": \"Type name\"\n  },\n  {\n    \"type\": \"TEXT\",\n    \"name\": \"customName\",\n    \"displayName\": \"\",\n    \"simpleValueType\": true,\n    \"enablingConditions\": [\n      {\n        \"paramName\": \"getType\",\n        \"paramValue\": \"custom\",\n        \"type\": \"EQUALS\"\n      }\n    ],\n    \"valueValidators\": [\n      {\n        \"type\": \"NON_EMPTY\"\n      }\n    ],\n    \"notSetText\": \"[Required value.]\"\n  },\n  {\n    \"type\": \"LABEL\",\n    \"name\": \"customNote\",\n    \"displayName\": \"\\u003cb\\u003eNote\\u003c/b\\u003e: If you want to get a custom type, you need to add the name of the type you want to get to the \\u003cb\\u003epermissions\\u003c/b\\u003e of the variable template with read permissions.\\u003cbr\\u003e\\nIf the permission is not set, the value of this variable will be undefined.\",\n    \"enablingConditions\": [\n      {\n        \"paramName\": \"getType\",\n        \"paramValue\": \"custom\",\n        \"type\": \"EQUALS\"\n      }\n    ]\n  }\n]\n\n\n___SANDBOXED_JS_FOR_WEB_TEMPLATE___\n\n// -------- setup\n// ---- requires\nconst queryPermission = require('queryPermission');\t// check for permissions.\nconst isConsentGranted = require('isConsentGranted');\t// check for consent state.\nconst copyFromDataLayer = require('copyFromDataLayer');\t// check for gtm'event.\nconst Object = require('Object');\t// object's loop processing of object.\n\n// ---- default setting\nconst consentTypesNames = {\n\tdefaultConsentTypesNames: {\n\t\t'ad_storage': 'ad_storage',\n\t\t'analytics_storage': 'analytics_storage',\n\t\t'functionality_storage': 'functionality_storage',\n\t\t'personalization_storage': 'personalization_storage',\n\t\t'security_storage': 'security_storage',\n\t\t'ad_user_data': 'ad_user_data',\n\t\t'ad_personalization': 'ad_personalization'\n\t},\n\tcustomConsentTypeName: {\n\t\t'custom': data.customName\n\t}\n};\nconst nowEvent = copyFromDataLayer('event');\n\n// -------- getting\nif(nowEvent !== 'gtm.init_consent'){\n\t// ---- normal\n\tswitch (data.selectTarget) {\n\t\tcase 'all':\n\t\t\tconst defaultConsentTypesNames = Object.keys(consentTypesNames.defaultConsentTypesNames);\n\t\t\tconst canQueryAllDefaultConsentTypes = defaultConsentTypesNames.every((consentType) => {\n\t\t\t\treturn queryPermission('access_consent', consentType, 'read');\n\t\t\t});\n\t\t\tif (canQueryAllDefaultConsentTypes) {\n\t\t\t\treturn defaultConsentTypesNames.reduce((obj, consentType) => {\n\t\t\t\t\tobj[consentType] = isConsentGranted(consentType);\n\t\t\t\t\treturn obj;\n\t\t\t\t}, {});\n\t\t\t}\n\t\t\tbreak;\n\t\tdefault:\n\t\t\tconst specificConsentType = \n\t\t\t\tconsentTypesNames.defaultConsentTypesNames[data.getType] ||\n\t\t\t\tconsentTypesNames.customConsentTypeName[data.getType];\n\t\t\tconst canQuerySpecificConsentType = queryPermission('access_consent', specificConsentType, 'read');\n\t\t\tif (canQuerySpecificConsentType) {\n\t\t\t\treturn isConsentGranted(specificConsentType);\n\t\t\t}\n\t}\n}else{\n\t// ---- gtm.init_consent\n\treturn undefined;\n}\n\n// -------- error\nreturn false;\n\n\n___WEB_PERMISSIONS___\n\n[\n  {\n    \"instance\": {\n      \"key\": {\n        \"publicId\": \"access_consent\",\n        \"versionId\": \"1\"\n      },\n      \"param\": [\n        {\n          \"key\": \"consentTypes\",\n          \"value\": {\n            \"type\": 2,\n            \"listItem\": [\n              {\n                \"type\": 3,\n                \"mapKey\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"consentType\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"read\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"write\"\n                  }\n                ],\n                \"mapValue\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"ad_storage\"\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": true\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": false\n                  }\n                ]\n              },\n              {\n                \"type\": 3,\n                \"mapKey\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"consentType\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"read\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"write\"\n                  }\n                ],\n                \"mapValue\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"analytics_storage\"\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": true\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": false\n                  }\n                ]\n              },\n              {\n                \"type\": 3,\n                \"mapKey\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"consentType\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"read\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"write\"\n                  }\n                ],\n                \"mapValue\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"functionality_storage\"\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": true\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": false\n                  }\n                ]\n              },\n              {\n                \"type\": 3,\n                \"mapKey\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"consentType\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"read\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"write\"\n                  }\n                ],\n                \"mapValue\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"personalization_storage\"\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": true\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": false\n                  }\n                ]\n              },\n              {\n                \"type\": 3,\n                \"mapKey\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"consentType\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"read\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"write\"\n                  }\n                ],\n                \"mapValue\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"security_storage\"\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": true\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": false\n                  }\n                ]\n              },\n              {\n                \"type\": 3,\n                \"mapKey\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"consentType\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"read\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"write\"\n                  }\n                ],\n                \"mapValue\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"ad_personalization\"\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": true\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": false\n                  }\n                ]\n              },\n              {\n                \"type\": 3,\n                \"mapKey\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"consentType\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"read\"\n                  },\n                  {\n                    \"type\": 1,\n                    \"string\": \"write\"\n                  }\n                ],\n                \"mapValue\": [\n                  {\n                    \"type\": 1,\n                    \"string\": \"ad_user_data\"\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": true\n                  },\n                  {\n                    \"type\": 8,\n                    \"boolean\": false\n                  }\n                ]\n              }\n            ]\n          }\n        }\n      ]\n    },\n    \"clientAnnotations\": {\n      \"isEditedByUser\": true\n    },\n    \"isRequired\": true\n  },\n  {\n    \"instance\": {\n      \"key\": {\n        \"publicId\": \"read_data_layer\",\n        \"versionId\": \"1\"\n      },\n      \"param\": [\n        {\n          \"key\": \"allowedKeys\",\n          \"value\": {\n            \"type\": 1,\n            \"string\": \"specific\"\n          }\n        },\n        {\n          \"key\": \"keyPatterns\",\n          \"value\": {\n            \"type\": 2,\n            \"listItem\": [\n              {\n                \"type\": 1,\n                \"string\": \"event\"\n              }\n            ]\n          }\n        }\n      ]\n    },\n    \"clientAnnotations\": {\n      \"isEditedByUser\": true\n    },\n    \"isRequired\": true\n  }\n]\n\n\n___TESTS___\n\nscenarios:\n- name: all\n  code: |-\n    const mockData = {\n      // Mocked field values\n      selectTarget: 'all'\n    };\n\n    // Call runCode to run the template's code.\n    let variableResult = runCode(mockData);\n\n    // Verify that the variable returns a result.\n    assertThat(variableResult).isNotEqualTo(undefined);\n- name: ad_storage\n  code: |-\n    const mockData = {\n      // Mocked field values\n      selectTarget: 'any',\n      getType: 'ad_storage'\n    };\n\n    // Call runCode to run the template's code.\n    let variableResult = runCode(mockData);\n\n    // Verify that the variable returns a result.\n    assertThat(variableResult).isNotEqualTo(undefined);\n- name: analytics_storage\n  code: |-\n    const mockData = {\n      // Mocked field values\n      selectTarget: 'any',\n      getType: 'analytics_storage'\n    };\n\n    // Call runCode to run the template's code.\n    let variableResult = runCode(mockData);\n\n    // Verify that the variable returns a result.\n    assertThat(variableResult).isNotEqualTo(undefined);\n- name: functionality_storage\n  code: |-\n    const mockData = {\n      // Mocked field values\n      selectTarget: 'any',\n      getType: 'functionality_storage'\n    };\n\n    // Call runCode to run the template's code.\n    let variableResult = runCode(mockData);\n\n    // Verify that the variable returns a result.\n    assertThat(variableResult).isNotEqualTo(undefined);\n- name: personalization_storage\n  code: |-\n    const mockData = {\n      // Mocked field values\n      selectTarget: 'any',\n      getType: 'personalization_storage'\n    };\n\n    // Call runCode to run the template's code.\n    let variableResult = runCode(mockData);\n\n    // Verify that the variable returns a result.\n    assertThat(variableResult).isNotEqualTo(undefined);\n- name: security_storage\n  code: |-\n    const mockData = {\n      // Mocked field values\n      selectTarget: 'any',\n      getType: 'security_storage'\n    };\n\n    // Call runCode to run the template's code.\n    let variableResult = runCode(mockData);\n\n    // Verify that the variable returns a result.\n    assertThat(variableResult).isNotEqualTo(undefined);\n- name: ad_personalization\n  code: |-\n    const mockData = {\n      // Mocked field values\n      selectTarget: 'any',\n      getType: 'ad_personalization'\n    };\n\n    // Call runCode to run the template's code.\n    let variableResult = runCode(mockData);\n\n    // Verify that the variable returns a result.\n    assertThat(variableResult).isNotEqualTo(undefined);\n- name: ad_user_data\n  code: |-\n    const mockData = {\n      // Mocked field values\n      selectTarget: 'any',\n      getType: 'ad_user_data'\n    };\n\n    // Call runCode to run the template's code.\n    let variableResult = runCode(mockData);\n\n    // Verify that the variable returns a result.\n    assertThat(variableResult).isNotEqualTo(undefined);\n- name: custom - testC\n  code: |-\n    const mockData = {\n      // Mocked field values\n      selectTarget: 'any',\n      getType: 'custom',\n      customName: 'testC'\n    };\n\n    // Call runCode to run the template's code.\n    let variableResult = runCode(mockData);\n\n    // Verify that the variable returns a result.\n    assertThat(variableResult).isNotEqualTo(undefined);\n\n\n___NOTES___\n\nCreated on 2021/6/21 12:59:49\n\n\n",
+        "galleryReference": {
+          "host": "github.com",
+          "owner": "Ayudante",
+          "repository": "gtm-consent-state",
+          "version": "355182c84e0d0036f8b1b4fa68ce503bcd3d807f",
+          "signature": "817c613eaf04add9a3ed2240ab3c10ac2df8a284f39c3279247c453a32b4b2cc",
+          "galleryTemplateId": "M6BW3"
+        }
       }
     ],
     "folder": [
